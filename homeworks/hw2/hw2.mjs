@@ -40,5 +40,4 @@ async function createFile(number) {
     const text = 'Soubor ' + number;
     await fs.writeFile(file, text);
     console.log(number);
-
 }
