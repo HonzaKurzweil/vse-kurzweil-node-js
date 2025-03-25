@@ -1,32 +1,149 @@
+<!DOCTYPE html>
 <html lang="en">
-    <head>
+  <head>
+    <meta charset="UTF-8" />
+    <title><%= siteTitle %></title>
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #f2f4f7, #dce1e7);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px;
+        min-height: 100vh;
+        color: #333;
+      }
 
-    </head>
-    <body>
-        <h1><%= siteTitle.toUpperCase() %></h1>
-        <h2><%= todo.title %></h2>
-        <ul>
-            <li>
-                <% if (todo.done) { %>
-                    dokončeno
-                <% } else { %>
-                    nedokončeno
-                <% } %>
-            </li>   
-        </ul>
-        
-         <a href="/todos/<%= todo.id %>/toggle?redirectTo=/todo/<%= todo.id %>/">změnit stav</a>
-      
-        -  
-        <a href="/todos/<%= todo.id %>/remove">odebrat</a>  
-        
-        <form method="post" action="/changeTitle/<%= todo.id %>/">
-            <input name="newTitle"/>
-            <button type="submit">změnit název</button>
-        </form>
+      .container {
+        background-color: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+      }
 
-        <form method="get" action="/">
-            <button type="submit">zpět</button>
-        </form>
-    </body>
+      h1 {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 16px;
+        color: #2a2a2a;
+      }
+
+      h2 {
+        text-align: center;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        color: #444;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 24px;
+      }
+
+      li {
+        background-color: #f0f3f6;
+        border: 1px solid #d1d6dc;
+        padding: 12px 16px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 1rem;
+      }
+
+      .actions {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
+      a {
+        display: inline-block;
+        margin: 5px 8px;
+        text-decoration: none;
+        color: #0077cc;
+        font-size: 0.95rem;
+        padding: 6px 12px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+      }
+
+      a:hover {
+        background-color: #e6f0fa;
+        color: #005999;
+        border-color: #c0d8ec;
+      }
+
+      form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 16px;
+        justify-content: center;
+      }
+
+      input[name="newTitle"] {
+        flex-grow: 1;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        min-width: 200px;
+        transition: border 0.2s;
+      }
+
+      input[name="newTitle"]:focus {
+        outline: none;
+        border-color: #0077cc;
+      }
+
+      button {
+        padding: 10px 16px;
+        background-color: #0077cc;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      button:hover {
+        background-color: #005fa3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1><%= siteTitle.toUpperCase() %></h1>
+      <h2><%= todo.title %></h2>
+
+      <ul>
+        <li>
+          <% if (todo.done) { %>
+            ✅ dokončeno
+          <% } else { %>
+            ⏳ nedokončeno
+          <% } %>
+        </li>
+      </ul>
+
+      <div class="actions">
+        <a href="/todos/<%= todo.id %>/toggle?redirectTo=/todo/<%= todo.id %>/">změnit stav</a>
+        <a href="/todos/<%= todo.id %>/remove">🗑 odebrat</a>
+      </div>
+
+      <form method="post" action="/changeTitle/<%= todo.id %>/">
+        <input name="newTitle" placeholder="Nový název..." />
+        <button type="submit">změnit název</button>
+      </form>
+
+      <form method="get" action="/">
+        <button type="submit">⬅️ zpět</button>
+      </form>
+    </div>
+  </body>
 </html>
