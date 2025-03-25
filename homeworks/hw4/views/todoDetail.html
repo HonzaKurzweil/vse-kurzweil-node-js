@@ -1,0 +1,32 @@
+<html lang="en">
+    <head>
+
+    </head>
+    <body>
+        <h1><%= siteTitle.toUpperCase() %></h1>
+        <h2><%= todo.title %></h2>
+        <ul>
+            <li>
+                <% if (todo.done) { %>
+                    dokončeno
+                <% } else { %>
+                    nedokončeno
+                <% } %>
+            </li>   
+        </ul>
+        
+         <a href="/todos/<%= todo.id %>/toggle?redirectTo=/todo/<%= todo.id %>/">změnit stav</a>
+      
+        -  
+        <a href="/todos/<%= todo.id %>/remove">odebrat</a>  
+        
+        <form method="post" action="/changeTitle/<%= todo.id %>/">
+            <input name="newTitle"/>
+            <button type="submit">změnit název</button>
+        </form>
+
+        <form method="get" action="/">
+            <button type="submit">zpět</button>
+        </form>
+    </body>
+</html>

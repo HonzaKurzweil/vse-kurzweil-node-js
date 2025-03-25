@@ -12,6 +12,7 @@
   "description": "",
   "dependencies": {
     "@hono/node-server": "^1.14.0",
+    "ejs": "^3.1.10",
     "hono": "^4.7.5"
   }
 }

@@ -1,0 +1,26 @@
+<html lang="en">
+    <head>
+
+    </head>
+    <body>
+        <h1><%= siteTitle.toUpperCase() %></h1>
+        <ul>
+            <% for (const todo of todos) { %>
+            <li>
+               <a href="/todo/<%= todo.id %>/"><%= todo.title %></a>             
+                -
+                <% if (todo.done) { %>
+                    <a href="/todos/<%= todo.id %>/toggle">dokončeno</a>
+                <% } else { %>
+                    <a href="/todos/<%= todo.id %>/toggle">nedokončeno</a>
+                <% } %>
+                <a href="/todos/<%= todo.id %>/remove">odebrat</a>
+            </li>
+            <% } %>
+        </ul>
+        <form method="post" action="/todos">
+            <input name="title"/>
+            <button type="submit">přidat todo</button>
+        </form>
+    </body>
+</html>
