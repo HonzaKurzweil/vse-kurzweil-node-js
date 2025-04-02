@@ -64,10 +64,9 @@ app.post('todos', async (c) => {
 app.post('changeTitle/:id/', async (c) => {
     const form = await c.req.formData()
     const id = Number(c.req.param('id'))
-    const todo = todos.find((todo) => todo.id === id)
-    if (!todo) return c.notFound()
-
-     todo.title = form.get('newTitle')
+    await db.update(todosTable)
+        .set({title: form.get('newTitle')})
+        .where(eq(todosTable.id, id))
     return c.redirect('/todo/' + id + "/")
 })
 
