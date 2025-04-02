@@ -70,6 +70,15 @@ app.post('changeTitle/:id/', async (c) => {
     return c.redirect('/todo/' + id + "/")
 })
 
+app.post('changePriority/:id/', async (c) => {
+    const form = await c.req.formData()
+    const id = Number(c.req.param('id'))
+    await db.update(todosTable)
+        .set({priority: form.get('newPriority')})
+        .where(eq(todosTable.id, id))
+    return c.redirect('/todo/' + id + "/")
+})
+
 app.get('/todos/:id/toggle', async (c) => {
     const id = Number(c.req.param('id'))
     const todo = await getTodoById(id)

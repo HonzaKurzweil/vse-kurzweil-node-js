@@ -15,6 +15,13 @@
       "when": 1743010620136,
       "tag": "0001_nebulous_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1743603742469,
+      "tag": "0002_lovely_whiplash",
+      "breakpoints": true
     }
   ]
 }

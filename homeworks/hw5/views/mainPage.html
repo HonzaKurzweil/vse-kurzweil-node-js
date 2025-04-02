@@ -113,6 +113,13 @@
         <% for (const todo of todos) { %>
         <li>
           <div>
+            <% if (todo.priority == "high") { %>
+              🔴
+            <% } else if (todo.priority == "low") { %>
+              🟢
+            <% } else { %>
+              🔵
+            <% } %>
             <a href="/todo/<%= todo.id %>/"><%= todo.title %></a>
           </div>
           <div class="actions">
