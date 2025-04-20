@@ -128,28 +128,10 @@
   <body>
     <div class="container">
       <h1><%= siteTitle.toUpperCase() %></h1>
-      <h2><%= todo.title %></h2>
 
-      <ul>
-        <li class="status-line">
-          <span>
-            <% if (todo.priority == "high") { %>
-              🔴 high priority
-            <% } else if (todo.priority == "low") { %>
-              🟢 low priority
-            <% } else { %>
-              🔵 normal priority
-            <% } %>
-          </span>
-          <span>
-            <% if (todo.done) { %>
-              ✅ dokončeno
-            <% } else { %>
-              ⏳ nedokončeno
-            <% } %>
-          </span>
-        </li>
-      </ul>
+      <div id="todo">
+        <%- include('_todo.html') %>
+      </div>
 
       <div class="actions">
         <a href="/todos/<%= todo.id %>/toggle?redirectTo=/todo/<%= todo.id %>/">změnit stav</a>
@@ -174,5 +156,21 @@
         <button type="submit">⬅️ zpět</button>
       </form>
     </div>
+
+       <script>
+       const ws = new WebSocket("ws://localhost:3000/ws")
+ 
+       ws.addEventListener("message", (evt) => {
+         const { type, id, html } = JSON.parse(evt.data)
+ 
+         if (type === "todo" && id === <%= todo.id %>) {
+           const el = document.getElementById("todo")
+ 
+           el.innerHTML = html
+         } else if (type === "todoDeleted" && id === <%= todo.id %>) {
+           window.location.replace('/')
+         }
+       })
+     </script>
   </body>
 </html>

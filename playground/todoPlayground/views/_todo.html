@@ -1,0 +1,22 @@
+<h2><%= todo.title %></h2>
+
+<ul>
+    <li class="status-line">
+      <span>
+        <% if (todo.priority == "high") { %>
+          🔴 high priority
+        <% } else if (todo.priority == "low") { %>
+          🟢 low priority
+        <% } else { %>
+          🔵 normal priority
+        <% } %>
+      </span>
+      <span>
+        <% if (todo.done) { %>
+          ✅ dokončeno
+        <% } else { %>
+          ⏳ nedokončeno
+        <% } %>
+      </span>
+    </li>
+  </ul>

@@ -72,6 +72,10 @@ app.post('changeTitle/:id/', async (c) => {
     await db.update(todosTable)
         .set({title: form.get('newTitle')})
         .where(eq(todosTable.id, id))
+    
+    sendTodosToAll()
+    sendTodoDetailToAllConnections(id)
+    
     return c.redirect('/todo/' + id + "/")
 })
 
@@ -81,7 +85,12 @@ app.post('changePriority/:id/', async (c) => {
     await db.update(todosTable)
         .set({priority: form.get('newPriority')})
         .where(eq(todosTable.id, id))
+    
+    sendTodosToAll()
+    sendTodoDetailToAllConnections(id)
+    
     return c.redirect('/todo/' + id + "/")
+
 })
 
 app.get('/todos/:id/toggle', async (c) => {
@@ -95,6 +104,7 @@ app.get('/todos/:id/toggle', async (c) => {
             .where(eq(todosTable.id, id))
 
     sendTodosToAll()
+    sendTodoDetailToAllConnections(id)
 
     // return c.redicrect(c.req.header("Referer"))
     const redirectTo = c.req.query('redirectTo') || '/'
@@ -106,6 +116,7 @@ app.get('/todos/:id/remove', async (c) => {
     console.log(id)
     await db.delete(todosTable).where(eq(todosTable.id, id))
     sendTodosToAll()
+    sendTodoDeletedToAllConnections(id)
     return c.redirect('/')
 })
 
@@ -156,6 +167,35 @@ const sendTodosToAll = async () => {
         connection.send(data)
     }
 }
+
+const sendTodoDetailToAllConnections = async (id) => {
+    const todo = await getTodoById(id)
+  
+    const rendered = await renderFile("views/_todo.html", {
+      todo,
+    })
+  
+    for (const connection of connections.values()) {
+      const data = JSON.stringify({
+        type: "todo",
+        id,
+        html: rendered,
+      })
+  
+      connection.send(data)
+    }
+  }
+  
+  const sendTodoDeletedToAllConnections = async (id) => {
+    for (const connection of connections.values()) {
+      const data = JSON.stringify({
+        type: "todoDeleted",
+        id,
+      })
+  
+      connection.send(data)
+    }
+  }
 
 /*
 serve(app,(info) => {
