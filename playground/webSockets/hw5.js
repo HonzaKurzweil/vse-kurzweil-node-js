@@ -12,6 +12,7 @@ import { drizzle } from 'drizzle-orm/libsql'
 import { todosTable } from './src/schema.js'
 import { eq } from 'drizzle-orm'
 import { createNodeWebSocket } from '@hono/node-ws'
+import { WSContext } from 'hono/ws'
 
 
 const app = new Hono()
@@ -61,6 +62,7 @@ app.post('todos', async (c) => {
     }).returning()
 
     console.log(inserted)
+    sendTodosToAll()
     return c.redirect('/')
 })
 
@@ -92,6 +94,7 @@ app.get('/todos/:id/toggle', async (c) => {
         .set({done: !todo.done})
             .where(eq(todosTable.id, id))
 
+    sendTodosToAll()
 
     // return c.redicrect(c.req.header("Referer"))
     const redirectTo = c.req.query('redirectTo') || '/'
@@ -102,7 +105,7 @@ app.get('/todos/:id/remove', async (c) => {
     const id = Number(c.req.param('id'))
     console.log(id)
     await db.delete(todosTable).where(eq(todosTable.id, id))
-
+    sendTodosToAll()
     return c.redirect('/')
 })
 
@@ -113,20 +116,46 @@ const getTodoById = async (id) => {
         .get()
 }
 
+/** @type{Set<WsContext<WebSocket>>} */
+const connections = new Set()
+
 app.get("/ws", upgradeWebSocket((c) => {
     console.log(c.req.path)
     return {
-        
+        onOpen: (event, ws) => {
+            connections.add(ws)
+            console.log("open")
+        },
+        onClose: (event, ws) => {
+            connections.delete(ws)
+            console.log("closed")
+        },
+        onMessage: (event, ws) => {
+            console.log("msg", event.data)
+        }
     }
 }))
 
 const server = serve(app, (info) => {
-    console.log(
-        console.log('App started on http://localhost:' + info.port)
-    )
+    console.log('App started on http://localhost:' + info.port)
 })
 
 injectWebSocket(server)
+
+const sendTodosToAll = async () => {
+    const todos = await db.select().from(todosTable).all()
+    const rendered = await renderFile("views/_todos.html", {
+        todos,
+    })
+
+    for (const connection of connections.values()) {
+        const data = JSON.stringify({
+            type: "todos",
+            html: rendered
+        })
+        connection.send(data)
+    }
+}
 
 /*
 serve(app,(info) => {

@@ -109,32 +109,9 @@
     <div class="container">
       <h1><%= siteTitle.toUpperCase() %></h1>
 
-      <ul>
-        <% for (const todo of todos) { %>
-        <li>
-          <div>
-            <% if (todo.priority == "high") { %>
-              🔴
-            <% } else if (todo.priority == "low") { %>
-              🟢
-            <% } else { %>
-              🔵
-            <% } %>
-            <a href="/todo/<%= todo.id %>/"><%= todo.title %></a>
-          </div>
-          <div class="actions">
-            <% if (todo.done) { %>
-              <a href="/todos/<%= todo.id %>/toggle">✅ dokončeno</a>
-            <% } else { %>
-              <a href="/todos/<%= todo.id %>/toggle">⏳ nedokončeno</a>
-            <% } %>
-            <a href="/todos/<%= todo.id %>/remove">🗑 odebrat</a>
-          </div>
-        </li>
-        <% } %>
-      </ul>
+     <div id="todos"><%- include('_todos.html') %></div>
 
-      <form method="post" action="/todos">
+     <form method="post" action="/todos">
         <input name="title" placeholder="Přidat nový úkol..." />
         <button type="submit">Přidat</button>
       </form>
@@ -142,6 +119,14 @@
 
 <script>
    const ws = new WebSocket("ws://localhost:3000/ws")
+ 
+   ws.addEventListener("message", (event) => {
+    const {type, html} = JSON.parse(event.data)
+    if (type === "todos") {
+      const el = document.getElementById("todos")
+      el.innerHTML = html
+    }  
+   })
 </script>
 
   </body>
