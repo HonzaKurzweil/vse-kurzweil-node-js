@@ -1,20 +1,26 @@
 import { Hono } from "hono"
-import { serveStatic } from "@hono/node-server/serve-static"
-import { renderFile } from "ejs"
-import { drizzle } from "drizzle-orm/libsql"
-import { todosTable } from "./schema.js"
-import { eq } from "drizzle-orm"
-import { createNodeWebSocket } from "@hono/node-ws"
+ import { logger } from "hono/logger"
+ import { serveStatic } from "@hono/node-server/serve-static"
+ import { renderFile } from "ejs"
+ import { drizzle } from "drizzle-orm/libsql"
+ import { todosTable } from "./schema.js"
+ import { eq } from "drizzle-orm"
+ import { createNodeWebSocket } from "@hono/node-ws"
+ import { WSContext } from "hono/ws"
 
 export const app = new Hono()
 
 export const {injectWebSocket, upgradeWebSocket} = createNodeWebSocket({ app }) 
 
-const db = drizzle({connection: "file:db.sqlite", 
-    logger: true
-})
+export const db = drizzle({
+    connection:
+      process.env.NODE_ENV === "test"
+        ? "file::memory:"
+        : "file:db.sqlite",
+    logger: process.env.NODE_ENV !== "test",
+  })
 
-const getTodoById = async (id) => {
+export const getTodoById = async (id) => {
 return await db.select()
 .from(todosTable)
 .where(eq(todosTable.id, id))
