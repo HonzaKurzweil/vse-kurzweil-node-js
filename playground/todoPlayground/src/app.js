@@ -27,6 +27,16 @@ return await db.select()
 .get()
 }
 
+
+export const getAllTodos = async () => {
+    return await db.select(
+        /* {
+     id: todosTable.id,
+     title: todosTable.title
+ } */
+    ).from(todosTable).all()
+  }
+
 /** @type{Set<WsContext<WebSocket>>} */
 const connections = new Set()
 
@@ -45,12 +55,7 @@ app.get('/todo/:id/', async (c) => {
 })
 
 app.get('/', async (c) => {
-    const todos = await db.select(
-       /* {
-        id: todosTable.id,
-        title: todosTable.title
-    } */
-).from(todosTable).all()
+    const todos = await getAllTodos()
 
     const rendered = await renderFile('views/mainPage.html',  {
         siteTitle: 'My todo app',
@@ -146,7 +151,7 @@ app.get("/ws", upgradeWebSocket((c) => {
 }))
 
 const sendTodosToAll = async () => {
-    const todos = await db.select().from(todosTable).all()
+    const todos = await getAllTodos()
     const rendered = await renderFile("views/_todos.html", {
         todos,
     })
