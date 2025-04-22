@@ -27,6 +27,33 @@ return await db.select()
 .get()
 }
 
+export const updateTodo = async (id, { title, done, priority }) => {
+    const updateFields = {}
+  
+    if (title != null) updateFields.title = title
+    if (done != null) updateFields.done = done
+    if (priority != null) updateFields.priority = priority
+  
+    if (Object.keys(updateFields).length === 0) return
+  
+    await db.update(todosTable)
+      .set(updateFields)
+      .where(eq(todosTable.id, id))
+  }
+
+export const deleteTodo = async (id) => {
+    await db.delete(todosTable).where(eq(todosTable.id, id))
+}
+
+export const getAllTodos = async () => {
+    return await db.select(
+        /* {
+     id: todosTable.id,
+     title: todosTable.title
+ } */
+    ).from(todosTable).all()
+  }
+
 /** @type{Set<WsContext<WebSocket>>} */
 const connections = new Set()
 
@@ -45,12 +72,7 @@ app.get('/todo/:id/', async (c) => {
 })
 
 app.get('/', async (c) => {
-    const todos = await db.select(
-       /* {
-        id: todosTable.id,
-        title: todosTable.title
-    } */
-).from(todosTable).all()
+    const todos = await getAllTodos()
 
     const rendered = await renderFile('views/mainPage.html',  {
         siteTitle: 'My todo app',
@@ -77,9 +99,8 @@ app.post('todos', async (c) => {
 app.post('changeTitle/:id/', async (c) => {
     const form = await c.req.formData()
     const id = Number(c.req.param('id'))
-    await db.update(todosTable)
-        .set({title: form.get('newTitle')})
-        .where(eq(todosTable.id, id))
+
+    await updateTodo(id, {title:form.get('newTitle')})
     
     sendTodosToAll()
     sendTodoDetailToAllConnections(id)
@@ -90,10 +111,9 @@ app.post('changeTitle/:id/', async (c) => {
 app.post('changePriority/:id/', async (c) => {
     const form = await c.req.formData()
     const id = Number(c.req.param('id'))
-    await db.update(todosTable)
-        .set({priority: form.get('newPriority')})
-        .where(eq(todosTable.id, id))
-    
+
+    await updateTodo(id, {priority:form.get('newPriority')})
+ 
     sendTodosToAll()
     sendTodoDetailToAllConnections(id)
     
@@ -107,9 +127,7 @@ app.get('/todos/:id/toggle', async (c) => {
     
     if (!todo) return c.notFound()
     
-    await db.update(todosTable)
-        .set({done: !todo.done})
-            .where(eq(todosTable.id, id))
+    await updateTodo(id, {done:!todo.done})
 
     sendTodosToAll()
     sendTodoDetailToAllConnections(id)
@@ -122,7 +140,7 @@ app.get('/todos/:id/toggle', async (c) => {
 app.get('/todos/:id/remove', async (c) => {
     const id = Number(c.req.param('id'))
     console.log(id)
-    await db.delete(todosTable).where(eq(todosTable.id, id))
+    await deleteTodo(id)
     sendTodosToAll()
     sendTodoDeletedToAllConnections(id)
     return c.redirect('/')
@@ -146,7 +164,7 @@ app.get("/ws", upgradeWebSocket((c) => {
 }))
 
 const sendTodosToAll = async () => {
-    const todos = await db.select().from(todosTable).all()
+    const todos = await getAllTodos()
     const rendered = await renderFile("views/_todos.html", {
         todos,
     })
