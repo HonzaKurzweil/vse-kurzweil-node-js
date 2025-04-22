@@ -99,9 +99,8 @@ app.post('todos', async (c) => {
 app.post('changeTitle/:id/', async (c) => {
     const form = await c.req.formData()
     const id = Number(c.req.param('id'))
-    await db.update(todosTable)
-        .set({title: form.get('newTitle')})
-        .where(eq(todosTable.id, id))
+
+    await updateTodo(id, {title:form.get('newTitle')})
     
     sendTodosToAll()
     sendTodoDetailToAllConnections(id)
@@ -112,10 +111,9 @@ app.post('changeTitle/:id/', async (c) => {
 app.post('changePriority/:id/', async (c) => {
     const form = await c.req.formData()
     const id = Number(c.req.param('id'))
-    await db.update(todosTable)
-        .set({priority: form.get('newPriority')})
-        .where(eq(todosTable.id, id))
-    
+
+    await updateTodo(id, {priority:form.get('newPriority')})
+ 
     sendTodosToAll()
     sendTodoDetailToAllConnections(id)
     
@@ -129,9 +127,7 @@ app.get('/todos/:id/toggle', async (c) => {
     
     if (!todo) return c.notFound()
     
-    await db.update(todosTable)
-        .set({done: !todo.done})
-            .where(eq(todosTable.id, id))
+    await updateTodo(id, {done:!todo.done})
 
     sendTodosToAll()
     sendTodoDetailToAllConnections(id)
@@ -144,7 +140,7 @@ app.get('/todos/:id/toggle', async (c) => {
 app.get('/todos/:id/remove', async (c) => {
     const id = Number(c.req.param('id'))
     console.log(id)
-    await db.delete(todosTable).where(eq(todosTable.id, id))
+    await deleteTodo(id)
     sendTodosToAll()
     sendTodoDeletedToAllConnections(id)
     return c.redirect('/')
