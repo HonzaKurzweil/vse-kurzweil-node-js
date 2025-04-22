@@ -27,6 +27,19 @@ return await db.select()
 .get()
 }
 
+export const updateTodo = async (id, { title, done, priority }) => {
+    const updateFields = {}
+  
+    if (title != null) updateFields.title = title
+    if (done != null) updateFields.done = done
+    if (priority != null) updateFields.priority = priority
+  
+    if (Object.keys(updateFields).length === 0) return
+  
+    await db.update(todosTable)
+      .set(updateFields)
+      .where(eq(todosTable.id, id))
+  }
 
 export const getAllTodos = async () => {
     return await db.select(
