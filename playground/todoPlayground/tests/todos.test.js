@@ -1,7 +1,7 @@
 
 import test from "ava"
 import { migrate } from "drizzle-orm/libsql/migrator"
-import { db, getTodoById, getAllTodos, updateTodo } from "../src/app.js"
+import { db, getTodoById, getAllTodos, updateTodo, deleteTodo } from "../src/app.js"
 import { todosTable } from "../src/schema.js"
 
 
@@ -46,5 +46,17 @@ test.serial("updateTodo returns updated todo", async (t) => {
   t.is(todo2.title, "zmena2")
   t.is(todo2.done, true)
   t.is(todo2.priority, "high")
+ 
+})
+
+test.serial("deleteTodo returns deleted todo", async (t) => {
+  const todo = await getTodoById(1)
+  t.truthy(todo)
+
+  await deleteTodo(1)
+
+  const todo1 = await getTodoById(1)
+  t.falsy(todo1) 
+
  
 })

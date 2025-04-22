@@ -41,6 +41,10 @@ export const updateTodo = async (id, { title, done, priority }) => {
       .where(eq(todosTable.id, id))
   }
 
+export const deleteTodo = async (id) => {
+    await db.delete(todosTable).where(eq(todosTable.id, id))
+}
+
 export const getAllTodos = async () => {
     return await db.select(
         /* {
