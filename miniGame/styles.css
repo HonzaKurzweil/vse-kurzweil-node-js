@@ -66,3 +66,39 @@ body {
   background-color: #2196F3;
   color: white;
 }
+
+.app-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+.auth-links {
+  display: flex;
+  gap: 10px;
+}
+
+.btn.link {
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.btn.link:hover {
+  background-color: white;
+  color: #004080;
+}
+
+.welcome {
+  color: white;
+  font-weight: bold;
+}
+
+.main-content {
+  text-align: center;
+  padding: 40px 20px;
+}

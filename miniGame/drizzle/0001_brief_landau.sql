@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `profilePicture` text DEFAULT 'dog.png' NOT NULL;
