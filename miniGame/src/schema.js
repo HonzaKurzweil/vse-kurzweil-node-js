@@ -11,4 +11,5 @@ export const usersTable = sqliteTable("users", {
   hashedPassword: text().notNull(),
   salt: text().notNull(),
   token: text().notNull(),
+  profilePicture: text().notNull().default("dog.png")
 })
