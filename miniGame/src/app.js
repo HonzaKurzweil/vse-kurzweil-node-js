@@ -1,7 +1,7 @@
 import { Hono } from "hono"
  import { renderFile } from "ejs"
 import { serveStatic } from "@hono/node-server/serve-static"
-import { usersRouter } from "./users.js"
+import { usersRouter, onlyForUsers, attachUser } from "./users.js"
 import { getCookie } from "hono/cookie"
 
 import {
@@ -12,6 +12,9 @@ import {
 
 export const app = new Hono()
 
+app.use(attachUser)
+
+
 app.get('/', async (c) => {
     
     const rendered = await renderFile('views/index.html',  {
@@ -20,16 +23,20 @@ app.get('/', async (c) => {
     return c.html(rendered)
 })
 
+app.get('/mainPage', onlyForUsers, async (c) => {
+    
+    const rendered = await renderFile('views/mainPage.html',  {
+    })
+    return c.html(rendered)
+})
+
+app.get('/unauthorized', async (c) => {
+  const rendered = await renderFile('views/unauthorized.html')
+  return c.html(rendered, 401)
+})
 
 app.use('/profile_pics/*', serveStatic({ root: './' }))
 app.use('/styles.css', serveStatic({ root: './' }))
 
-
-app.use(async (c, next) => {
-  const token = getCookie(c, "token")
-  const user = await getUserByToken(token)
-  c.set("user", user)
-  await next()
-})
 
 app.route("/", usersRouter)

@@ -1,21 +1,39 @@
 import { renderFile } from "ejs"
 import { Hono } from "hono"
 import { createUser, db, getUser } from "./db.js"
-import { setCookie } from "hono/cookie"
+import { getCookie, setCookie } from "hono/cookie"
 import { eq } from "drizzle-orm"
+import { getUserByToken } from "./db.js"
 
 export const usersRouter = new Hono()
 
-const onlyForUsers = async (c, next) => {
+export const onlyForUsers = async (c, next) => {
   const user = c.get("user")
-  if (!user) return c.notFound()
+  console.log("user is:", user)
+  if (!user) return c.redirect('/unauthorized')
   await next()
 }
+
+export const attachUser = async (c, next) => {
+  const token = getCookie(c, "token")
+  const user = await getUserByToken(token)
+  console.log("setting user to: ", user)
+  c.set("user", user)
+  await next()
+}
+
+usersRouter.use(attachUser)
+
 
 usersRouter.get("/register", async (c) => {
   const rendered = await renderFile("views/register.html")
 
   return c.html(rendered)
+})
+
+usersRouter.get('/logout', (c) => {
+    setCookie(c, "token", "")
+  return c.redirect('/')
 })
 
 usersRouter.post("/register", async (c) => {
@@ -28,7 +46,7 @@ usersRouter.post("/register", async (c) => {
 
   setCookie(c, "token", user.token)
 
-  return c.redirect("/")
+  return c.redirect("/mainPage")
 })
 
 usersRouter.get("/login", async (c) => {
@@ -49,5 +67,6 @@ usersRouter.post("/login", async (c) => {
 
   setCookie(c, "token", user.token)
 
-  return c.redirect("/")
+  return c.redirect("/mainPage")
 })
+
