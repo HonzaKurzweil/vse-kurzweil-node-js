@@ -7,9 +7,10 @@ import { getUserByToken } from "./db.js"
 
 export const usersRouter = new Hono()
 
+export const activeUsers = new Set()
+
 export const onlyForUsers = async (c, next) => {
   const user = c.get("user")
-  console.log("user is:", user)
   if (!user) return c.redirect('/unauthorized')
   await next()
 }
@@ -17,7 +18,6 @@ export const onlyForUsers = async (c, next) => {
 export const attachUser = async (c, next) => {
   const token = getCookie(c, "token")
   const user = await getUserByToken(token)
-  console.log("setting user to: ", user)
   c.set("user", user)
   await next()
 }
@@ -32,6 +32,11 @@ usersRouter.get("/register", async (c) => {
 })
 
 usersRouter.get('/logout', (c) => {
+     const user = c.get("user")
+     console.log("user to delete", user)
+  if (user) {
+    activeUsers.delete(user)
+  }
     setCookie(c, "token", "")
   return c.redirect('/')
 })
@@ -45,7 +50,7 @@ usersRouter.post("/register", async (c) => {
   )
 
   setCookie(c, "token", user.token)
-
+  activeUsers.add(user)
   return c.redirect("/mainPage")
 })
 
@@ -66,7 +71,20 @@ usersRouter.post("/login", async (c) => {
   if (!user) return c.notFound()
 
   setCookie(c, "token", user.token)
+  activeUsers.add(user)
 
   return c.redirect("/mainPage")
+})
+
+usersRouter.post('/users/logoff-beacon', async (c) => {
+  try {
+    const { token } = await c.req.json()
+    // Lookup user by token however you normally do
+    const user = await findUserByToken(token)
+    if (user) activeUsers.delete(user)
+  } catch (e) {
+    // ignore
+  }
+  return c.body(null, 204)
 })
 

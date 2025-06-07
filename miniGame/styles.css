@@ -102,3 +102,22 @@ body {
   text-align: center;
   padding: 40px 20px;
 }
+
+.player {
+  display: inline-block;
+  text-align: center;
+  margin: 0 10px;
+}
+
+.player img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.player .username {
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #333;
+}

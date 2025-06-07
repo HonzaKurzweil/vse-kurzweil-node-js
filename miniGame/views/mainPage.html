@@ -4,25 +4,38 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Testovací Aplikace</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <header class="top-bar">
-    <div class="players">
-      <!-- Ukázka hráčů -->
-      <div class="player">
-        <img src="../profile_pics/cat.png" alt="Profil" />
-      </div>
-      <div class="player">
-        <img src="../profile_pics/dog.png" alt="Profil" />
-      </div>
+   <div class="players">
+  <% players.forEach(function(player) { %>
+    <div class="player" title="<%= player.username %>">
+      <!-- Profile picture -->
+      <img
+        src="/profile_pics/<%= player.profilePicture %>"
+        alt="Profil <%= player.username %>"
+      />
+      <!-- Username below -->
+      <div class="username"><%= player.username %></div>
     </div>
-        <a href="/logout" class="btn">Odhlásit se</a>
+  <% }); %>
+</div>
+    <a href="/logout" class="btn">Odhlásit se</a>
   </header>
 
   <main class="main-content">
     <button class="btn play">Play</button>
     <button class="btn friends">Friends</button>
   </main>
+  <script>
+  // Try to notify server when user closes tab or navigates away
+  window.addEventListener('unload', function () {
+    // navigator.sendBeacon is best for this scenario
+    const url = '/users/logoff-beacon'
+    const payload = JSON.stringify({ token: '<%= it.user?.token %>' })
+    navigator.sendBeacon(url, payload)
+  })
+</script>
 </body>
 </html>

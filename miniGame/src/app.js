@@ -1,7 +1,7 @@
 import { Hono } from "hono"
  import { renderFile } from "ejs"
 import { serveStatic } from "@hono/node-server/serve-static"
-import { usersRouter, onlyForUsers, attachUser } from "./users.js"
+import { usersRouter, onlyForUsers, attachUser, activeUsers } from "./users.js"
 import { getCookie } from "hono/cookie"
 
 import {
@@ -11,6 +11,7 @@ import {
 
 
 export const app = new Hono()
+
 
 app.use(attachUser)
 
@@ -24,8 +25,14 @@ app.get('/', async (c) => {
 })
 
 app.get('/mainPage', onlyForUsers, async (c) => {
+
+      const players = Array.from(activeUsers).map(u => ({
+    username: u.username,
+    profilePicture: u.profilePicture
+  }))
     
     const rendered = await renderFile('views/mainPage.html',  {
+        players
     })
     return c.html(rendered)
 })
