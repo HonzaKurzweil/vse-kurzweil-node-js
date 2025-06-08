@@ -64,3 +64,11 @@ export const getUserByToken = async (token) => {
 
   return user
 }
+
+export const findUserById = async (id) => {
+    if (!id) return null
+    return await db.select()
+    .from(usersTable)
+    .where(eq(usersTable.id, id))
+    .get()
+}

@@ -35,7 +35,7 @@ usersRouter.get('/logout', (c) => {
      const user = c.get("user")
      console.log("user to delete", user)
   if (user) {
-    activeUsers.delete(user)
+    activeUsers.delete(user.id)
   }
     setCookie(c, "token", "")
   return c.redirect('/')
@@ -50,7 +50,7 @@ usersRouter.post("/register", async (c) => {
   )
 
   setCookie(c, "token", user.token)
-  activeUsers.add(user)
+  activeUsers.add(user.id)
   return c.redirect("/mainPage")
 })
 
@@ -71,20 +71,9 @@ usersRouter.post("/login", async (c) => {
   if (!user) return c.notFound()
 
   setCookie(c, "token", user.token)
-  activeUsers.add(user)
+  activeUsers.add(user.id)
 
   return c.redirect("/mainPage")
 })
 
-usersRouter.post('/users/logoff-beacon', async (c) => {
-  try {
-    const { token } = await c.req.json()
-    // Lookup user by token however you normally do
-    const user = await findUserByToken(token)
-    if (user) activeUsers.delete(user)
-  } catch (e) {
-    // ignore
-  }
-  return c.body(null, 204)
-})
 

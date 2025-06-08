@@ -28,14 +28,5 @@
     <button class="btn play">Play</button>
     <button class="btn friends">Friends</button>
   </main>
-  <script>
-  // Try to notify server when user closes tab or navigates away
-  window.addEventListener('unload', function () {
-    // navigator.sendBeacon is best for this scenario
-    const url = '/users/logoff-beacon'
-    const payload = JSON.stringify({ token: '<%= it.user?.token %>' })
-    navigator.sendBeacon(url, payload)
-  })
-</script>
 </body>
 </html>

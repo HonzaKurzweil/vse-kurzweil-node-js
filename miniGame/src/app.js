@@ -5,6 +5,7 @@ import { usersRouter, onlyForUsers, attachUser, activeUsers } from "./users.js"
 import { getCookie } from "hono/cookie"
 
 import {
+    findUserById,
   getUserByToken,
 } from "./db.js"
 
@@ -24,13 +25,11 @@ app.get('/', async (c) => {
     return c.html(rendered)
 })
 
-app.get('/mainPage', onlyForUsers, async (c) => {
-
-      const players = Array.from(activeUsers).map(u => ({
-    username: u.username,
-    profilePicture: u.profilePicture
-  }))
-    
+app.get('/mainPage', attachUser, onlyForUsers, async (c) => {
+  const players = await Promise.all(
+    Array.from(activeUsers).map(id => findUserById(id))
+  )
+    console.log("active players:", players)
     const rendered = await renderFile('views/mainPage.html',  {
         players
     })
