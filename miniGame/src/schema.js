@@ -1,9 +1,4 @@
-
-import {
-  sqliteTable,
-  int,
-  text,
-} from "drizzle-orm/sqlite-core"
+import { sqliteTable, int, text } from "drizzle-orm/sqlite-core";
 
 export const usersTable = sqliteTable("users", {
   id: int().primaryKey({ autoIncrement: true }),
@@ -11,5 +6,5 @@ export const usersTable = sqliteTable("users", {
   hashedPassword: text().notNull(),
   salt: text().notNull(),
   token: text().notNull(),
-  profilePicture: text().notNull().default("dog.png")
-})
+  profilePicture: text().notNull().default("dog.png"),
+});

@@ -1,11 +1,8 @@
-
-
-import { serve } from  '@hono/node-server'
-import { app} from "./src/app.js"
-
+import { serve } from "@hono/node-server";
+import { app, injectWebSocket } from "./src/app.js";
 
 const server = serve(app, (info) => {
-    console.log('App started on http://localhost:' + info.port)
-})
-//injectWebSocket(server)
+  console.log("App started on http://localhost:" + info.port);
+});
 
+injectWebSocket(server);

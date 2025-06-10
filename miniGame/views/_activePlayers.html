@@ -1,0 +1,13 @@
+<div class="players">
+  <% players.forEach(function(player) { %>
+    <div class="player" title="<%= player.username %>">
+      <!-- Profile picture -->
+      <img
+        src="/profile_pics/<%= player.profilePicture %>"
+        alt="Profil <%= player.username %>"
+      />
+      <!-- Username below -->
+      <div class="username"><%= player.username %></div>
+    </div>
+  <% }); %>
+</div>

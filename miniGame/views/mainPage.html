@@ -8,19 +8,9 @@
 </head>
 <body>
   <header class="top-bar">
-   <div class="players">
-  <% players.forEach(function(player) { %>
-    <div class="player" title="<%= player.username %>">
-      <!-- Profile picture -->
-      <img
-        src="/profile_pics/<%= player.profilePicture %>"
-        alt="Profil <%= player.username %>"
-      />
-      <!-- Username below -->
-      <div class="username"><%= player.username %></div>
-    </div>
-  <% }); %>
-</div>
+   
+         <div id="activePlayers"><%- include('_activePlayers.html') %></div>
+
     <a href="/logout" class="btn">Odhlásit se</a>
   </header>
 
@@ -28,5 +18,18 @@
     <button class="btn play">Play</button>
     <button class="btn friends">Friends</button>
   </main>
+
+  <script>
+   const ws = new WebSocket("ws://localhost:3000/ws")
+ 
+   ws.addEventListener("message", (event) => {
+    console.log('received event', data)
+    const {type, html} = JSON.parse(event.data)
+    if (type === "activePlayers") {
+      const el = document.getElementById("activePlayers")
+      el.innerHTML = html
+    }  
+   })
+</script>
 </body>
 </html>
