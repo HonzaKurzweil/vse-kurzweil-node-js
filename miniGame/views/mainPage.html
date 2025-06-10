@@ -23,7 +23,7 @@
    const ws = new WebSocket("ws://localhost:3000/ws")
  
    ws.addEventListener("message", (event) => {
-    console.log('received event', data)
+    console.log('received event', event.data)
     const {type, html} = JSON.parse(event.data)
     if (type === "activePlayers") {
       const el = document.getElementById("activePlayers")

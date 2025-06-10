@@ -6,8 +6,34 @@ import { createNodeWebSocket } from "@hono/node-ws";
 
 import { findUserById, getUserByToken } from "./db.js";
 
-export const app = new Hono();
+/** @type{Set<WsContext<WebSocket>>} */
+const connections = new Set();
 
+export const app = new Hono();
+export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
+  app,
+});
+export const sendActivePlayers = async () => {
+  const players = await Promise.all(
+    Array.from(activeUsers).map((id) => findUserById(id))
+  );
+  const rendered = await renderFile("views/_activePlayers.html", {
+    players,
+  });
+
+  for (const connection of connections.values()) {
+    const data = JSON.stringify({
+      type: "activePlayers",
+      html: rendered,
+    });
+    connection.send(data);
+  }
+};
+
+app.route("/", usersRouter);
+
+app.use("/profile_pics/*", serveStatic({ root: "./" }));
+app.use("/styles.css", serveStatic({ root: "./" }));
 app.use(attachUser);
 
 app.get("/", async (c) => {
@@ -33,15 +59,6 @@ app.get("/unauthorized", async (c) => {
   return c.html(rendered, 401);
 });
 
-app.use("/profile_pics/*", serveStatic({ root: "./" }));
-app.use("/styles.css", serveStatic({ root: "./" }));
-
-app.route("/", usersRouter);
-
-export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
-  app,
-});
-
 app.get(
   "/ws",
   upgradeWebSocket((c) => {
@@ -61,23 +78,3 @@ app.get(
     };
   })
 );
-
-/** @type{Set<WsContext<WebSocket>>} */
-const connections = new Set();
-
-export const sendActivePlayers = async () => {
-  const players = await Promise.all(
-    Array.from(activeUsers).map((id) => findUserById(id))
-  );
-  const rendered = await renderFile("views/_activePlayers.html", {
-    players,
-  });
-
-  for (const connection of connections.values()) {
-    const data = JSON.stringify({
-      type: "activePlayers",
-      html: rendered,
-    });
-    connection.send(data);
-  }
-};
