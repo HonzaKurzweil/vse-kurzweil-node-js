@@ -20,7 +20,11 @@ export const onlyForUsers = async (c, next) => {
 export const attachUser = async (c, next) => {
   const token = getCookie(c, "token");
   const user = await getUserByToken(token);
-  c.set("user", user);
+  if (user && activeUsers.has(user.id)) {
+    c.set("user", user);
+  } else {
+    c.set("user", null);
+  }
   await next();
 };
 
