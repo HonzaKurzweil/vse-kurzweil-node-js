@@ -54,6 +54,13 @@ app.get("/mainPage", attachUser, onlyForUsers, async (c) => {
   return c.html(rendered);
 });
 
+app.get("/friendsPage", async (c) => {
+  const rendered = await renderFile("views/friendsPage.html", {
+    user: c.get("user"),
+  });
+  return c.html(rendered);
+});
+
 app.get("/unauthorized", async (c) => {
   const rendered = await renderFile("views/unauthorized.html");
   return c.html(rendered, 401);

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Friends List</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <div class="app-title">Friends</div>
+    <a href="/mainPage" class="btn link">Zpět</a>
+  </header>
+
+  <main class="main-content">
+
+    <section>
+      <h2>add  friend</h2>
+      <form action="/friends/add" method="post">
+        <input type="text" name="username" placeholder="Uživatelské jméno" required />
+        <button type="submit" class="btn">Přidat</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>friendship requests</h2>
+      <% if (friendRequests.length === 0) { %>
+        <p>No new requests.</p>
+      <% } else { %>
+        <ul class="request-list">
+          <% friendRequests.forEach(request => { %>
+            <li>
+              <span><%= request.username %></span>
+              <form action="/friends/accept" method="post" style="display:inline">
+                <input type="hidden" name="userId" value="<%= request.id %>" />
+                <button type="submit" class="btn small">accept</button>
+              </form>
+              <form action="/friends/decline" method="post" style="display:inline">
+                <input type="hidden" name="userId" value="<%= request.id %>" />
+                <button type="submit" class="btn small danger">decline</button>
+              </form>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </section>
+
+    <section>
+      <h2>friends list</h2>
+      <% if (friends.length === 0) { %>
+        <p>You have no friends :(.</p>
+      <% } else { %>
+        <ul class="friend-list">
+          <% friends.forEach(friend => { %>
+            <li>
+              <span><%= friend.username %></span>
+              <form action="/friends/delete" method="post" style="display:inline">
+                <input type="hidden" name="userId" value="<%= friend.id %>" />
+                <button type="submit" class="btn small danger">remove</button>
+              </form>
+              <form action="/scoreboard/mutual" method="get" style="display:inline">
+                <input type="hidden" name="friendId" value="<%= friend.id %>" />
+                <button type="submit" class="btn small">Scoreboard</button>
+              </form>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </section>
+
+  </main>
+</body>
+</html>

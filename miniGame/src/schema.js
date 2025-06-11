@@ -8,3 +8,14 @@ export const usersTable = sqliteTable("users", {
   token: text().notNull(),
   profilePicture: text().notNull().default("dog.png"),
 });
+
+export const friendsTable = sqliteTable("friends", {
+  id: int().primaryKey({ autoIncrement: true }),
+  senderId: int()
+    .notNull()
+    .references(() => usersTable.id),
+  receiverId: int()
+    .notNull()
+    .references(() => usersTable.id),
+  status: text().notNull().default("pending"), // pending, accepted, declined
+});
