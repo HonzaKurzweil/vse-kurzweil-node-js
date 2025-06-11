@@ -80,6 +80,38 @@ export const sendFriendshipRequest = async (senderId, receiverId) => {
     .select()
     .from(friendsTable)
     .where(
+      or(
+        and(
+          eq(friendsTable.senderId, receiverId),
+          eq(friendsTable.receiverId, senderId),
+          eq(friendsTable.status, "accepted")
+        ),
+        and(
+          eq(friendsTable.senderId, senderId),
+          eq(friendsTable.receiverId, receiverId),
+          or(
+            eq(friendsTable.status, "pending"),
+            eq(friendsTable.status, "accepted")
+          )
+        )
+      )
+    )
+    .limit(1);
+  if (existing.length > 0) return null;
+
+  return await db.insert(friendsTable).values({
+    senderId: sender.id,
+    receiverId: receiver.id,
+  });
+};
+
+export const confirmFriendshipRequest = async (senderId, receiverId) => {
+  if (!senderId || !receiverId) return null;
+
+  const originalRequest = await db
+    .select()
+    .from(friendsTable)
+    .where(
       and(
         eq(friendsTable.senderId, senderId),
         eq(friendsTable.receiverId, receiverId)
@@ -87,10 +119,71 @@ export const sendFriendshipRequest = async (senderId, receiverId) => {
     )
     .limit(1);
 
-  if (existing.length > 0) return null;
+  if (originalRequest.length === 0) return null;
 
-  return await db.insert(friendsTable).values({
-    senderId: sender.id,
-    receiverId: receiver.id,
-  });
+  await db
+    .update(friendsTable)
+    .set({ status: "accepted" })
+    .where(
+      and(
+        eq(friendsTable.senderId, senderId),
+        eq(friendsTable.receiverId, receiverId)
+      )
+    );
+
+  await db
+    .update(friendsTable)
+    .set({ status: "declined" })
+    .where(
+      and(
+        eq(friendsTable.senderId, receiverId),
+        eq(friendsTable.receiverId, senderId)
+      )
+    );
+};
+
+export const declineFriendRequest = async (senderId, receiverId) => {
+  if (!senderId || !receiverId) return null;
+
+  const originalRequest = await db
+    .select()
+    .from(friendsTable)
+    .where(
+      and(
+        eq(friendsTable.senderId, senderId),
+        eq(friendsTable.receiverId, receiverId)
+      )
+    )
+    .limit(1);
+
+  if (originalRequest.length === 0) return null;
+
+  await db
+    .update(friendsTable)
+    .set({ status: "declined" })
+    .where(
+      and(
+        eq(friendsTable.senderId, senderId),
+        eq(friendsTable.receiverId, receiverId)
+      )
+    );
+};
+
+export const removeFriend = async (senderId, receiverId) => {
+  if (!senderId || !receiverId) return null;
+
+  await db
+    .delete(friendsTable)
+    .where(
+      or(
+        and(
+          eq(friendsTable.senderId, senderId),
+          eq(friendsTable.receiverId, receiverId)
+        ),
+        and(
+          eq(friendsTable.senderId, receiverId),
+          eq(friendsTable.receiverId, senderId)
+        )
+      )
+    );
 };
