@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { drizzle } from "drizzle-orm/libsql";
-import { eq } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import { migrate } from "drizzle-orm/libsql/migrator";
 import { usersTable, friendsTable } from "./schema.js";
 
@@ -195,4 +195,47 @@ export const removeFriend = async (senderId, receiverId) => {
         )
       )
     );
+};
+
+export const fetchFriendRequests = async (receiverId) => {
+  if (!receiverId) return null;
+
+  return await db
+    .select({
+      id: usersTable.id,
+      username: usersTable.username,
+    })
+    .from(friendsTable)
+    .innerJoin(usersTable, eq(friendsTable.senderId, usersTable.id))
+    .where(
+      and(
+        eq(friendsTable.receiverId, receiverId),
+        eq(friendsTable.status, "pending")
+      )
+    );
+};
+
+export const fetchFriends = async (currentUserId) => {
+  if (!currentUserId) return null;
+
+  return await db
+    .select({
+      id: usersTable.id,
+      username: usersTable.username,
+    })
+    .from(friendsTable)
+    .innerJoin(
+      usersTable,
+      or(
+        and(
+          eq(friendsTable.receiverId, usersTable.id),
+          eq(friendsTable.senderId, currentUserId)
+        ),
+        and(
+          eq(friendsTable.senderId, usersTable.id),
+          eq(friendsTable.receiverId, currentUserId)
+        )
+      )
+    )
+    .where(eq(friendsTable.status, "accepted"));
 };

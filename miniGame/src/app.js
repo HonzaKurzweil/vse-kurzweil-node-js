@@ -7,6 +7,8 @@ import { createNodeWebSocket } from "@hono/node-ws";
 import {
   confirmFriendshipRequest,
   declineFriendRequest,
+  fetchFriendRequests,
+  fetchFriends,
   findUserById,
   findUserByUserName,
   getUserByToken,
@@ -64,8 +66,17 @@ app.get("/mainPage", attachUser, onlyForUsers, async (c) => {
 });
 
 app.get("/friendsPage", async (c) => {
+  const token = getCookie(c, "token");
+  const user = await getUserByToken(token);
+  if (!user) return c.redirect("/login");
+
+  const friends = await fetchFriends(user.id);
+
+  const friendRequests = await fetchFriendRequests(user.id);
+
   const rendered = await renderFile("views/friendsPage.html", {
-    user: c.get("user"),
+    friends,
+    friendRequests,
   });
   return c.html(rendered);
 });
@@ -95,12 +106,18 @@ app.get(
   })
 );
 
-app.post("/friends/add/:username", async (c) => {
-  const receiver = await findUserByUserName(c.req.param("username"));
+app.post("/friends/add", async (c) => {
+  const form = await c.req.formData();
+  const username = form.get("username");
+  if (!username) return c.text("Neplatné jméno", 400);
+
+  const receiver = await findUserByUserName(username);
   if (!receiver) return c.text("receiver not found", 404);
+
   const token = getCookie(c, "token");
   const sender = await getUserByToken(token);
   if (!sender) return c.redirect("/login");
+
   await sendFriendshipRequest(sender.id, receiver.id);
   return c.redirect("/friendsPage");
 });
@@ -125,7 +142,7 @@ app.post("/friends/decline/:username", async (c) => {
   return c.redirect("/friendsPage");
 });
 
-app.post("/friends/remove/:username", async (c) => {
+app.post("/friends/delete/:username", async (c) => {
   const receiver = await findUserByUserName(c.req.param("username"));
   if (!receiver) return c.text("receiver not found", 404);
   const token = getCookie(c, "token");
