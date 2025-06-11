@@ -69,6 +69,15 @@ export const findUserById = async (id) => {
   return await db.select().from(usersTable).where(eq(usersTable.id, id)).get();
 };
 
+export const findUserByUserName = async (userName) => {
+  if (!userName) return null;
+  return await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.username, userName))
+    .get();
+};
+
 export const sendFriendshipRequest = async (senderId, receiverId) => {
   if (!senderId || !receiverId) return null;
   const receiver = await findUserById(receiverId);
