@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
+  <% if (error) { %>
+    <div class="popup-error"><%= error %></div>
+    <script>
+      setTimeout(() => {
+        const popup = document.querySelector('.popup-error');
+        if (popup) popup.style.display = 'none';
+      }, 3000);
+    </script>
+  <% } %>
   <header class="top-bar">
     <div class="app-title">Přátelé</div>
     <a href="/mainPage" class="btn link">Zpět</a>

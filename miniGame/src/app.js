@@ -71,12 +71,13 @@ app.get("/friendsPage", async (c) => {
   if (!user) return c.redirect("/login");
 
   const friends = await fetchFriends(user.id);
-
   const friendRequests = await fetchFriendRequests(user.id);
+  const error = c.req.query("error");
 
   const rendered = await renderFile("views/friendsPage.html", {
     friends,
     friendRequests,
+    error,
   });
   return c.html(rendered);
 });
@@ -109,14 +110,16 @@ app.get(
 app.post("/friends/add", async (c) => {
   const form = await c.req.formData();
   const username = form.get("username");
-  if (!username) return c.text("Neplatné jméno", 400);
+  if (!username) return c.redirect("/friendsPage?error=Neplatné jméno");
 
   if (username === c.get("user")?.username) {
-    return c.text("You cannot send a friend request to yourself", 400);
+    return c.redirect(
+      "/friendsPage?error=You cannot send a friend request to yourself"
+    );
   }
 
   const receiver = await findUserByUserName(username);
-  if (!receiver) return c.text("receiver not found", 404);
+  if (!receiver) return c.redirect("/friendsPage?error=receiver not found");
 
   const token = getCookie(c, "token");
   const sender = await getUserByToken(token);
@@ -128,7 +131,7 @@ app.post("/friends/add", async (c) => {
 
 app.post("/friends/accept/:username", async (c) => {
   const sender = await findUserByUserName(c.req.param("username"));
-  if (!sender) return c.text("sender not found", 404);
+  if (!sender) return c.redirect("/friendsPage?error=sender not found");
   const token = getCookie(c, "token");
   const receiver = await getUserByToken(token);
   if (!receiver) return c.redirect("/login");
@@ -138,7 +141,8 @@ app.post("/friends/accept/:username", async (c) => {
 
 app.post("/friends/decline/:username", async (c) => {
   const sender = await findUserByUserName(c.req.param("username"));
-  if (!sender) return c.text("sender not found", 404);
+  if (!sender) return c.redirect("/friendsPage?error=sender not found");
+
   const token = getCookie(c, "token");
   const receiver = await getUserByToken(token);
   if (!receiver) return c.redirect("/login");
@@ -148,15 +152,14 @@ app.post("/friends/decline/:username", async (c) => {
 
 app.post("/friends/delete/:username", async (c) => {
   const receiver = await findUserByUserName(c.req.param("username"));
-  if (!receiver) return c.text("receiver not found", 404);
+  if (!sender) return c.redirect("/friendsPage?error=receiver not found");
+
   const token = getCookie(c, "token");
   const sender = await getUserByToken(token);
   if (!sender) return c.redirect("/login");
   await removeFriend(sender.id, receiver.id);
   return c.redirect("/friendsPage");
 });
-
-//TODO: add  pop up message when request to unknown user is sent
 
 //TODO: add pop up message when incorrect credentials are used
 
