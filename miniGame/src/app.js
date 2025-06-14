@@ -111,6 +111,10 @@ app.post("/friends/add", async (c) => {
   const username = form.get("username");
   if (!username) return c.text("Neplatné jméno", 400);
 
+  if (username === c.get("user")?.username) {
+    return c.text("You cannot send a friend request to yourself", 400);
+  }
+
   const receiver = await findUserByUserName(username);
   if (!receiver) return c.text("receiver not found", 404);
 
@@ -151,8 +155,6 @@ app.post("/friends/delete/:username", async (c) => {
   await removeFriend(sender.id, receiver.id);
   return c.redirect("/friendsPage");
 });
-
-//TODO: adjust so friend request to yourself is not allowed
 
 //TODO: add  pop up message when request to unknown user is sent
 
