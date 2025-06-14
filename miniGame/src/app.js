@@ -22,8 +22,9 @@ import {
   sendFriendshipRequest,
 } from "./db.js";
 import { getCookie } from "hono/cookie";
+import { createNewClickOnSignalGame } from "./games/clickOnSignalGame.js";
 
-const connections = new Map();
+export const connections = new Map();
 
 export const app = new Hono();
 export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
@@ -33,8 +34,6 @@ export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
 export const sendActivePlayers = async () => {
   for (const [ws, userId] of connections.entries()) {
     const activeFriends = await getActiveFriends(userId);
-    console.log("userId:", userId);
-    console.log("active friends:", activeFriends);
     const rendered = await renderFile("views/_activePlayers.html", {
       players: activeFriends,
     });
@@ -128,12 +127,4 @@ app.get(
     };
   })
 );
-
-app.get("/clickOnSignalGame", async (c) => {
-  const rendered = await renderFile("views/clickOnSignalGame.html");
-  return c.html(rendered, 401);
-});
-
 //TODO: add image/name/password change to profile page
-
-//TODO: make it so only active FRINEDS are seen in Active players
