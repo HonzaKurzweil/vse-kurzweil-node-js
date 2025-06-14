@@ -9,6 +9,15 @@
     <title>Document</title>
   </head>
   <body>
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="popup-error"><%= error %></div>
+      <script>
+        setTimeout(() => {
+          const popup = document.querySelector('.popup-error');
+          if (popup) popup.style.display = 'none';
+        }, 3000);
+      </script>
+    <% } %>
     <h1>Přihlášení</h1>
     <form action="/login" method="post">
       <input

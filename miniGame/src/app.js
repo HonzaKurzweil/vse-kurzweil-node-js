@@ -161,8 +161,6 @@ app.post("/friends/delete/:username", async (c) => {
   return c.redirect("/friendsPage");
 });
 
-//TODO: add pop up message when incorrect credentials are used
-
 //TODO: add imiage selection to registration
 
 //TODO: add image/name/password change to profile page

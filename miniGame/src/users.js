@@ -61,21 +61,19 @@ usersRouter.post("/register", async (c) => {
 });
 
 usersRouter.get("/login", async (c) => {
-  const rendered = await renderFile("views/login.html");
-
+  const error = c.req.query("error");
+  const rendered = await renderFile("views/login.html", { error });
   return c.html(rendered);
 });
 
 usersRouter.post("/login", async (c) => {
   const form = await c.req.formData();
-
   const user = await getUser(form.get("username"), form.get("password"));
-
-  if (!user) return c.notFound();
-
+  if (!user) {
+    return c.redirect("/login?error=Incorrect username or password");
+  }
   setCookie(c, "token", user.token);
   activeUsers.add(user.id);
   await sendActivePlayers();
-
   return c.redirect("/mainPage");
 });
