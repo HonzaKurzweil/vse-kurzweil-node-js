@@ -107,60 +107,6 @@ app.get(
   })
 );
 
-app.post("/friends/add", async (c) => {
-  const form = await c.req.formData();
-  const username = form.get("username");
-  if (!username) return c.redirect("/friendsPage?error=Neplatné jméno");
-
-  if (username === c.get("user")?.username) {
-    return c.redirect(
-      "/friendsPage?error=You cannot send a friend request to yourself"
-    );
-  }
-
-  const receiver = await findUserByUserName(username);
-  if (!receiver) return c.redirect("/friendsPage?error=receiver not found");
-
-  const token = getCookie(c, "token");
-  const sender = await getUserByToken(token);
-  if (!sender) return c.redirect("/login");
-
-  await sendFriendshipRequest(sender.id, receiver.id);
-  return c.redirect("/friendsPage");
-});
-
-app.post("/friends/accept/:username", async (c) => {
-  const sender = await findUserByUserName(c.req.param("username"));
-  if (!sender) return c.redirect("/friendsPage?error=sender not found");
-  const token = getCookie(c, "token");
-  const receiver = await getUserByToken(token);
-  if (!receiver) return c.redirect("/login");
-  await confirmFriendshipRequest(sender.id, receiver.id);
-  return c.redirect("/friendsPage");
-});
-
-app.post("/friends/decline/:username", async (c) => {
-  const sender = await findUserByUserName(c.req.param("username"));
-  if (!sender) return c.redirect("/friendsPage?error=sender not found");
-
-  const token = getCookie(c, "token");
-  const receiver = await getUserByToken(token);
-  if (!receiver) return c.redirect("/login");
-  await declineFriendRequest(sender.id, receiver.id);
-  return c.redirect("/friendsPage");
-});
-
-app.post("/friends/delete/:username", async (c) => {
-  const receiver = await findUserByUserName(c.req.param("username"));
-  if (!receiver) return c.redirect("/friendsPage?error=receiver not found");
-
-  const token = getCookie(c, "token");
-  const sender = await getUserByToken(token);
-  if (!sender) return c.redirect("/login");
-  await removeFriend(sender.id, receiver.id);
-  return c.redirect("/friendsPage");
-});
-
 //TODO: add image/name/password change to profile page
 
 //TODO: make it so only active FRINEDS are seen in Active players
