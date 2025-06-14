@@ -152,7 +152,7 @@ app.post("/friends/decline/:username", async (c) => {
 
 app.post("/friends/delete/:username", async (c) => {
   const receiver = await findUserByUserName(c.req.param("username"));
-  if (!sender) return c.redirect("/friendsPage?error=receiver not found");
+  if (!receiver) return c.redirect("/friendsPage?error=receiver not found");
 
   const token = getCookie(c, "token");
   const sender = await getUserByToken(token);
@@ -161,10 +161,6 @@ app.post("/friends/delete/:username", async (c) => {
   return c.redirect("/friendsPage");
 });
 
-//TODO: add imiage selection to registration
-
 //TODO: add image/name/password change to profile page
-
-//TODO: add avatar to friends list
 
 //TODO: make it so only active FRINEDS are seen in Active players

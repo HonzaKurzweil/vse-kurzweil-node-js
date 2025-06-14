@@ -38,6 +38,7 @@
         <ul class="request-list">
           <% friendRequests.forEach(request => { %>
             <li>
+              <img src="/profile_pics/<%= request.profilePicture || 'dog.png' %>" alt="avatar" class="avatar" width="32" height="32" style="vertical-align:middle; margin-right:8px;">
               <span><%= request.username %></span>
 
               <form action="/friends/accept/<%= request.username %>" method="post" style="display:inline">
@@ -61,6 +62,7 @@
         <ul class="friend-list">
           <% friends.forEach(friend => { %>
             <li>
+              <img src="/profile_pics/<%= friend.profilePicture || 'dog.png' %>" alt="avatar" class="avatar" width="32" height="32" style="vertical-align:middle; margin-right:8px;">
               <span><%= friend.username %></span>
 
               <form action="/friends/delete/<%= friend.username %>" method="post" style="display:inline">
