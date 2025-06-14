@@ -129,6 +129,11 @@ app.get(
   })
 );
 
+app.get("/clickOnSignalGame", async (c) => {
+  const rendered = await renderFile("views/clickOnSignalGame.html");
+  return c.html(rendered, 401);
+});
+
 //TODO: add image/name/password change to profile page
 
 //TODO: make it so only active FRINEDS are seen in Active players
