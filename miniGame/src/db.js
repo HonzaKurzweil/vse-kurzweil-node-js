@@ -13,7 +13,7 @@ export const db = drizzle({
 
 await migrate(db, { migrationsFolder: "drizzle" });
 
-export const createUser = async (username, password) => {
+export const createUser = async (username, password, profilePicture) => {
   const salt = crypto.randomBytes(16).toString("hex");
   const hashedPassword = crypto
     .pbkdf2Sync(password, salt, 100000, 64, "sha512")
@@ -27,6 +27,7 @@ export const createUser = async (username, password) => {
       hashedPassword,
       token,
       salt,
+      profilePicture,
     })
     .returning(usersTable)
     .get();

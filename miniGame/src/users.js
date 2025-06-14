@@ -20,11 +20,9 @@ export const onlyForUsers = async (c, next) => {
 export const attachUser = async (c, next) => {
   const token = getCookie(c, "token");
   const user = await getUserByToken(token);
-  if (user && activeUsers.has(user.id)) {
-    c.set("user", user);
-  } else {
-    c.set("user", null);
-  }
+
+  // maybe I need to check if the user is in the activeUsers set as well?
+  c.set("user", user);
   await next();
 };
 
@@ -50,7 +48,11 @@ usersRouter.get("/logout", async (c) => {
 usersRouter.post("/register", async (c) => {
   const form = await c.req.formData();
 
-  const user = await createUser(form.get("username"), form.get("password"));
+  const user = await createUser(
+    form.get("username"),
+    form.get("password"),
+    form.get("profilePicture")
+  );
 
   setCookie(c, "token", user.token);
   activeUsers.add(user.id);
