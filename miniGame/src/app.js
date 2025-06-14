@@ -151,3 +151,17 @@ app.post("/friends/delete/:username", async (c) => {
   await removeFriend(sender.id, receiver.id);
   return c.redirect("/friendsPage");
 });
+
+//TODO: adjust so friend request to yourself is not allowed
+
+//TODO: add  pop up message when request to unknown user is sent
+
+//TODO: add pop up message when incorrect credentials are used
+
+//TODO: add imiage selection to registration
+
+//TODO: add image/name/password change to profile page
+
+//TODO: add avatar to friends list
+
+//TODO: make it so only active FRINEDS are seen in Active players
