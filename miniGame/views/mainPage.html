@@ -15,9 +15,16 @@
   </header>
 
   <main class="main-content">
-    <button class="btn play">Play</button>
-     <a href="/friendsPage" class="btn">Friends</a>
-
+    <div id="gameRequestSection">
+      <select id="activePlayersSelect">
+        <option value="">-- Select active friend to play --</option>
+        <% players.forEach(function(player) { %>
+          <option value="<%= player.id %>"><%= player.username %></option>
+        <% }); %>
+      </select>
+      <button id="requestGameBtn">Play</button>
+    </div>
+    <a href="/friendsPage" class="btn">Friends</a>
   </main>
 
   <script>
@@ -29,8 +36,42 @@
     if (type === "activePlayers") {
       const el = document.getElementById("activePlayers")
       el.innerHTML = html
+      // Also update the select box
+      const select = document.getElementById("activePlayersSelect");
+      if (select) {
+        // Remove all except the first option
+        while (select.options.length > 1) select.remove(1);
+        // Parse html to get usernames and ids
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        tempDiv.querySelectorAll('.player').forEach(playerDiv => {
+          const username = playerDiv.querySelector('.username').textContent;
+          const id = playerDiv.getAttribute('title');
+          const option = document.createElement('option');
+          option.value = id;
+          option.textContent = username;
+          select.appendChild(option);
+        });
+      }
     }  
    })
-</script>
+
+   document.getElementById('requestGameBtn').onclick = async function() {
+     const select = document.getElementById('activePlayersSelect');
+     const playerId = select.value;
+     if (!playerId) return alert('Please select a player!');
+     // Send request to server to start game
+     const res = await fetch('/requestGame', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ opponentId: playerId })
+     });
+     if (res.ok) {
+       window.location.href = '/clickOnSignalGame';
+     } else {
+       alert('Could not send game request.');
+     }
+   }
+  </script>
 </body>
 </html>

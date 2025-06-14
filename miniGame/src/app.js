@@ -8,18 +8,15 @@ import {
   activeUsers,
   getActiveFriends,
 } from "./users.js";
+
+import { clickOnSignalRouter } from "./games/clickOnSignal.js";
 import { createNodeWebSocket } from "@hono/node-ws";
 
 import {
-  confirmFriendshipRequest,
-  declineFriendRequest,
   fetchFriendRequests,
   fetchFriends,
   findUserById,
-  findUserByUserName,
   getUserByToken,
-  removeFriend,
-  sendFriendshipRequest,
 } from "./db.js";
 import { getCookie } from "hono/cookie";
 
@@ -65,6 +62,7 @@ export const sendActivePlayersOld = async () => {
 };
 
 app.route("/", usersRouter);
+app.route("/", clickOnSignalRouter);
 
 app.use("/profile_pics/*", serveStatic({ root: "./" }));
 app.use("/styles.css", serveStatic({ root: "./" }));
@@ -108,6 +106,11 @@ app.get("/unauthorized", async (c) => {
   return c.html(rendered, 401);
 });
 
+app.get("/clickOnSignalGame", async (c) => {
+  const rendered = await renderFile("views/clickOnSignalGame.html");
+  return c.html(rendered, 401);
+});
+
 app.get(
   "/ws",
   upgradeWebSocket((c) => {
@@ -128,6 +131,25 @@ app.get(
     };
   })
 );
+
+// In-memory pending game requests: { [userId]: { from: userId, to: userId, status: 'pending'|'accepted' } }
+const pendingGameRequests = {};
+
+app.post("/requestGame", onlyForUsers, async (c) => {
+  const user = c.get("user");
+  const { opponentId } = await c.req.json();
+  if (!opponentId || opponentId === user.id) {
+    return c.json({ error: "Invalid opponent" }, 400);
+  }
+  // Store the request for the opponent
+  pendingGameRequests[opponentId] = {
+    from: user.id,
+    to: opponentId,
+    status: "pending",
+  };
+  // Optionally notify the opponent via WebSocket here
+  return c.json({ ok: true });
+});
 
 //TODO: add image/name/password change to profile page
 
