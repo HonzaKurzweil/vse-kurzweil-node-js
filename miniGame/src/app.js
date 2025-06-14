@@ -1,7 +1,13 @@
 import { Hono } from "hono";
 import { renderFile } from "ejs";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { usersRouter, onlyForUsers, attachUser, activeUsers } from "./users.js";
+import {
+  usersRouter,
+  onlyForUsers,
+  attachUser,
+  activeUsers,
+  getActiveFriends,
+} from "./users.js";
 import { createNodeWebSocket } from "@hono/node-ws";
 
 import {
@@ -17,14 +23,31 @@ import {
 } from "./db.js";
 import { getCookie } from "hono/cookie";
 
-/** @type{Set<WsContext<WebSocket>>} */
-const connections = new Set();
+const connections = new Map();
 
 export const app = new Hono();
 export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
   app,
 });
+
 export const sendActivePlayers = async () => {
+  for (const [ws, userId] of connections.entries()) {
+    const activeFriends = await getActiveFriends(userId);
+    console.log("userId:", userId);
+    console.log("active friends:", activeFriends);
+    const rendered = await renderFile("views/_activePlayers.html", {
+      players: activeFriends,
+    });
+    ws.send(
+      JSON.stringify({
+        type: "activePlayers",
+        html: rendered,
+      })
+    );
+  }
+};
+
+export const sendActivePlayersOld = async () => {
   const players = await Promise.all(
     Array.from(activeUsers).map((id) => findUserById(id))
   );
@@ -54,10 +77,8 @@ app.get("/", async (c) => {
   return c.html(rendered);
 });
 
-app.get("/mainPage", attachUser, onlyForUsers, async (c) => {
-  const players = await Promise.all(
-    Array.from(activeUsers).map((id) => findUserById(id))
-  );
+app.get("/mainPage", onlyForUsers, async (c) => {
+  const players = await getActiveFriends(c.get("user").id);
   console.log("active players:", players);
   const rendered = await renderFile("views/mainPage.html", {
     players,
@@ -90,18 +111,19 @@ app.get("/unauthorized", async (c) => {
 app.get(
   "/ws",
   upgradeWebSocket((c) => {
+    const token = getCookie(c, "token");
+
     console.log(c.req.path);
     return {
-      onOpen: (event, ws) => {
-        connections.add(ws);
+      onOpen: async (event, ws) => {
+        const user = await getUserByToken(token);
+
+        connections.set(ws, user.id);
         console.log("open");
       },
       onClose: (event, ws) => {
         connections.delete(ws);
         console.log("closed");
-      },
-      onMessage: (event, ws) => {
-        console.log("msg", event.data);
       },
     };
   })

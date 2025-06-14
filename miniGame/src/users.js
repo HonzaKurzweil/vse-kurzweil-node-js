@@ -38,6 +38,12 @@ export const attachUser = async (c, next) => {
   await next();
 };
 
+export const getActiveFriends = async (userId) => {
+  if (!userId) return [];
+  const friends = await fetchFriends(userId);
+  return friends.filter((friend) => activeUsers.has(friend.id));
+};
+
 usersRouter.use(attachUser);
 
 usersRouter.get("/register", async (c) => {

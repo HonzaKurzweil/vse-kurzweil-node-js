@@ -223,6 +223,7 @@ export const fetchFriends = async (currentUserId) => {
     .select({
       id: usersTable.id,
       username: usersTable.username,
+      profilePicture: usersTable.profilePicture,
     })
     .from(friendsTable)
     .innerJoin(
