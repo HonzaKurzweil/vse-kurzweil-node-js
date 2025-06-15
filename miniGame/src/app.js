@@ -17,6 +17,7 @@ import {
   getUserByToken,
 } from "./db.js";
 import { getCookie } from "hono/cookie";
+import { clickOnSignalGame } from "./games/clickOnSignalGame.js";
 
 export const connections = new Map();
 
@@ -54,6 +55,7 @@ export const sendActivePlayers = async () => {
 };
 
 app.route("/", usersRouter);
+app.route("/", clickOnSignalGame);
 
 app.use("/profile_pics/*", serveStatic({ root: "./" }));
 app.use("/styles.css", serveStatic({ root: "./" }));
