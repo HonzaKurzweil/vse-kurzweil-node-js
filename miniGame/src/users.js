@@ -31,8 +31,11 @@ export const attachUser = async (c, next) => {
   const token = getCookie(c, "token");
   const user = await getUserByToken(token);
 
-  // maybe I need to check if the user is in the activeUsers set as well?
-  c.set("user", user);
+  if (user && activeUsers.has(user.id)) {
+    c.set("user", user);
+  } else {
+    c.set("user", null);
+  }
   await next();
 };
 
