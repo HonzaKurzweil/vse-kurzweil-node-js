@@ -70,7 +70,7 @@ clickOnSignalGame.get("/sendGameRequest/:receiverId", async (c) => {
   }
 
   const game = createNewClickOnSignalGame(sender.id);
-  console.log("Created new game:", game.id);
+  console.log("Created new game:", game);
 
   let sent = false;
   connections.forEach((userId, ws) => {
@@ -81,7 +81,7 @@ clickOnSignalGame.get("/sendGameRequest/:receiverId", async (c) => {
         JSON.stringify({
           type: "newGameRequest",
           sender,
-          gameType,
+          gameType: game.gameType,
           gameId: game.id,
         })
       );
