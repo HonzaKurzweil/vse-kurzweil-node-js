@@ -15,7 +15,10 @@
   </header>
 
   <main class="main-content">
-    <button class="btn play">Play</button>
+
+             <div id="sendGameRequestSection"><%- include('_sendGameRequest.html') %></div>
+
+
      <a href="/friendsPage" class="btn">Friends</a>
 
   </main>
@@ -29,7 +32,11 @@
     if (type === "activePlayers") {
       const el = document.getElementById("activePlayers")
       el.innerHTML = html
-    }  
+    }
+    if (type === "gameRequest") {
+      const el1 = document.getElementById("sendGameRequestSection")
+      el1.innerHTML = html
+    }
    })
 </script>
 </body>

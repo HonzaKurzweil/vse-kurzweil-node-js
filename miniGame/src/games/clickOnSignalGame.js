@@ -1,6 +1,6 @@
 import { Hono } from "hono";
-import { getActiveFriends } from "../users";
-import { connections } from "../app";
+import { connections } from "../app.js";
+import { getActiveFriends } from "../users.js";
 
 export const clickOnSignalGame = new Hono();
 
@@ -50,14 +50,19 @@ clickOnSignalGame.get("/sendGameRequest/:receiverId", async (c) => {
     return c.text("invalid receiver id", 400);
   }
 
-  const activeFriends = getActiveFriends(c.get("user"));
+  const sender = c.get("user");
+  if (!sender) {
+    return c.text("unauthorized", 401);
+  }
+
+  const activeFriends = getActiveFriends(sender.id);
 
   const receiver = activeFriends.find((friend) => friend.id === id);
   if (!receiver) {
     return c.text("receiver not found", 404);
   }
 
-  const game = createNewClickOnSignalGame(c.get("user").id);
+  const game = createNewClickOnSignalGame(sender.id);
 
   connections.forEach((ws, userId) => {
     if (userId === receiver.id) {

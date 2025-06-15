@@ -1,0 +1,10 @@
+     <div id="sendGameRequestSection" style="margin-bottom:2em;">
+      <h3>Odeslat herní žádost</h3>
+      <select id="activePlayersSelect">
+        <option value="">-- Vyberte aktivního přítele --</option>
+        <% players.forEach(function(player) { %>
+          <option value="<%= player.id %>"><%= player.username %></option>
+        <% }); %>
+      </select>
+      <button id="sendRequestBtn">Odeslat herní žádost</button>
+    </div>  

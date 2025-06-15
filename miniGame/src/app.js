@@ -11,18 +11,12 @@ import {
 import { createNodeWebSocket } from "@hono/node-ws";
 
 import {
-  confirmFriendshipRequest,
-  declineFriendRequest,
   fetchFriendRequests,
   fetchFriends,
   findUserById,
-  findUserByUserName,
   getUserByToken,
-  removeFriend,
-  sendFriendshipRequest,
 } from "./db.js";
 import { getCookie } from "hono/cookie";
-import { createNewClickOnSignalGame } from "./games/clickOnSignalGame.js";
 
 export const connections = new Map();
 
@@ -34,32 +28,28 @@ export const { injectWebSocket, upgradeWebSocket } = createNodeWebSocket({
 export const sendActivePlayers = async () => {
   for (const [ws, userId] of connections.entries()) {
     const activeFriends = await getActiveFriends(userId);
-    const rendered = await renderFile("views/_activePlayers.html", {
+    const renderedctiveFriends = await renderFile("views/_activePlayers.html", {
       players: activeFriends,
     });
+
+    const renderedGameRequest = await renderFile(
+      "views/_sendGameRequest.html",
+      {
+        players: activeFriends,
+      }
+    );
     ws.send(
       JSON.stringify({
         type: "activePlayers",
-        html: rendered,
+        html: renderedctiveFriends,
       })
     );
-  }
-};
-
-export const sendActivePlayersOld = async () => {
-  const players = await Promise.all(
-    Array.from(activeUsers).map((id) => findUserById(id))
-  );
-  const rendered = await renderFile("views/_activePlayers.html", {
-    players,
-  });
-
-  for (const connection of connections.values()) {
-    const data = JSON.stringify({
-      type: "activePlayers",
-      html: rendered,
-    });
-    connection.send(data);
+    ws.send(
+      JSON.stringify({
+        type: "gameRequest",
+        html: renderedGameRequest,
+      })
+    );
   }
 };
 
