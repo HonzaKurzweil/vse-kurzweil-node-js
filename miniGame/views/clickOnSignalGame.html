@@ -34,58 +34,5 @@
       <button id="quitBtn">Quit</button>
     </div>
   </div>
-  <script>
-    let ws;
-    let canClick = false;
-    function connect() {
-      ws = new WebSocket(`ws://${location.host}/ws/click-on-signal`);
-      ws.onopen = () => {
-        // Optionally send join info
-      };
-      ws.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-        if (msg.type === 'wait') {
-          document.getElementById('colorField').style.background = 'red';
-          document.getElementById('colorField').textContent = 'Wait...';
-          document.getElementById('clickBtn').classList.add('hidden');
-          document.getElementById('resultMsg').classList.add('hidden');
-          document.getElementById('afterGameBtns').classList.add('hidden');
-        } else if (msg.type === 'go') {
-          document.getElementById('colorField').style.background = 'green';
-          document.getElementById('colorField').textContent = 'GO!';
-          document.getElementById('clickBtn').classList.remove('hidden');
-          canClick = true;
-        } else if (msg.type === 'result') {
-          document.getElementById('resultMsg').textContent = msg.text;
-          document.getElementById('resultMsg').classList.remove('hidden');
-          document.getElementById('afterGameBtns').classList.remove('hidden');
-          document.getElementById('clickBtn').classList.add('hidden');
-          document.getElementById('colorField').textContent = 'Finished';
-          document.getElementById('colorField').style.background = '#888';
-          canClick = false;
-        } else if (msg.type === 'reset') {
-          document.getElementById('colorField').style.background = 'red';
-          document.getElementById('colorField').textContent = 'Wait...';
-          document.getElementById('clickBtn').classList.add('hidden');
-          document.getElementById('resultMsg').classList.add('hidden');
-          document.getElementById('afterGameBtns').classList.add('hidden');
-        }
-      };
-    }
-    document.getElementById('clickBtn').onclick = () => {
-      if (canClick) {
-        ws.send(JSON.stringify({ type: 'click' }));
-        canClick = false;
-      }
-    };
-    document.getElementById('playAgainBtn').onclick = () => {
-      ws.send(JSON.stringify({ type: 'playAgain' }));
-    };
-    document.getElementById('quitBtn').onclick = () => {
-      ws.send(JSON.stringify({ type: 'quit' }));
-      window.location.href = '/mainPage';
-    };
-    connect();
-  </script>
 </body>
 </html>

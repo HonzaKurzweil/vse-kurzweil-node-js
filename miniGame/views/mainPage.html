@@ -18,6 +18,8 @@
 
     <div id="sendGameRequestSection"><%- include('_sendGameRequest.html') %></div>
      <a href="/friendsPage" class="btn">Friends</a>
+         <div id="receiveGameRequest"><%- include('_receiveGameRequest.html') %></div>
+
 
   </main>
 
@@ -26,7 +28,15 @@
  
    ws.addEventListener("message", (event) => {
     console.log('received event', event.data)
-    const {type, html} = JSON.parse(event.data)
+    let data;
+    try {
+      data = JSON.parse(event.data)
+    } catch (e) {
+      console.log('Failed to parse ws message:', event.data, e);
+      return;
+    }
+    console.log('Parsed ws message:', data);
+    const {type, html} = data;
     if (type === "activePlayers") {
       const el = document.getElementById("activePlayers")
       el.innerHTML = html
@@ -34,6 +44,19 @@
     if (type === "gameRequest") {
       const el1 = document.getElementById("sendGameRequestSection")
       el1.innerHTML = html
+    }
+    if (data.type === 'newGameRequest') {
+      console.log('Handling newGameRequest:', data);
+      if (window.gameRequests && window.renderGameRequests) {
+        window.gameRequests.push({
+          sender: data.sender,
+          game: { id: data.gameId, type: data.gameType }
+        });
+        window.renderGameRequests();
+        console.log('Added new game request and re-rendered.');
+      } else {
+        console.log('gameRequests or renderGameRequests not found on window.');
+      }
     }
    })
 </script>

@@ -8,6 +8,7 @@ export const clickOnSignalGame = new Hono();
 class GameInstancec {
   constructor() {
     this.id = crypto.randomUUID();
+    this.gameType = "clickOnSignal";
     this.players = [];
     this.state = "waiting"; // waiting, ready, finished
     this.winner = null;
@@ -49,33 +50,47 @@ clickOnSignalGame.get("/sendGameRequest/:receiverId", async (c) => {
   console.log("sendGameRequest called: ", c.req.param("receiverId"));
   const id = Number(c.req.param("receiverId"));
   if (!id) {
+    console.log("Invalid receiver id");
     return c.text("invalid receiver id", 400);
   }
 
   const sender = c.get("user");
   if (!sender) {
+    console.log("Unauthorized: no sender");
     return c.text("unauthorized", 401);
   }
 
   const activeFriends = await getActiveFriends(sender.id);
+  console.log("Active friends for sender:", activeFriends);
 
   const receiver = activeFriends.find((friend) => friend.id === id);
   if (!receiver) {
+    console.log("Receiver not found among active friends");
     return c.text("receiver not found", 404);
   }
 
   const game = createNewClickOnSignalGame(sender.id);
+  console.log("Created new game:", game.id);
 
-  connections.forEach((ws, userId) => {
+  let sent = false;
+  connections.forEach((userId, ws) => {
+    console.log("Checking connection for userId:", userId);
     if (userId === receiver.id) {
+      console.log("Sending newGameRequest to receiver:", receiver.id);
       ws.send(
         JSON.stringify({
-          type: "gameRequest",
+          type: "newGameRequest",
+          sender,
+          gameType,
           gameId: game.id,
         })
       );
+      sent = true;
     }
   });
+  if (!sent) {
+    console.log("No WebSocket found for receiver:", receiver.id);
+  }
 
   c.set("game", game.id);
   const rendered = await renderFile("views/clickOnSignalGame.html");
