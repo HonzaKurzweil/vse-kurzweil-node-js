@@ -46,9 +46,9 @@ const createNewClickOnSignalGame = (playerId) => {
   return game;
 };
 
-clickOnSignalGame.get("/sendGameRequest/:receiverId", async (c) => {
-  console.log("sendGameRequest called: ", c.req.param("receiverId"));
-  const id = Number(c.req.param("receiverId"));
+clickOnSignalGame.get("/sendGameRequest", async (c) => {
+  const id = c.req.query("receiverId");
+  console.log("sendGameRequest called: ", id);
   if (!id) {
     console.log("Invalid receiver id");
     return c.text("invalid receiver id", 400);
@@ -63,7 +63,9 @@ clickOnSignalGame.get("/sendGameRequest/:receiverId", async (c) => {
   const activeFriends = await getActiveFriends(sender.id);
   console.log("Active friends for sender:", activeFriends);
 
-  const receiver = activeFriends.find((friend) => friend.id === id);
+  const receiver = activeFriends.find(
+    (friend) => String(friend.id) === String(id)
+  );
   if (!receiver) {
     console.log("Receiver not found among active friends");
     return c.text("receiver not found", 404);
@@ -75,7 +77,7 @@ clickOnSignalGame.get("/sendGameRequest/:receiverId", async (c) => {
   let sent = false;
   connections.forEach((userId, ws) => {
     console.log("Checking connection for userId:", userId);
-    if (userId === receiver.id) {
+    if (String(userId) === String(receiver.id)) {
       console.log("Sending newGameRequest to receiver:", receiver.id);
       ws.send(
         JSON.stringify({
