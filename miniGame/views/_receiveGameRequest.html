@@ -6,16 +6,16 @@
         <p>Žádné nové žádosti.</p>
       <% } else { %>
         <ul class="request-list">
-          <% gameRequests.forEach(gameReq => { %>
+          <% gameRequests.forEach(sender => { %>
             <li>
-              <img src="/profile_pics/<%= gameReq.profilePicture %>" alt="avatar" class="avatar" width="32" height="32" style="vertical-align:middle; margin-right:8px;">
-              <span><%= gameReq.username %></span>
+              <img src="/profile_pics/<%= sender.profilePicture %>" alt="avatar" class="avatar" width="32" height="32" style="vertical-align:middle; margin-right:8px;">
+              <span><%= sender.username %></span>
 
-              <form action="/friends/accept/<%= gameReq.username %>" method="post" style="display:inline">
+              <form action="/acceptGameRequest/<%= sender.id %>" method="post" style="display:inline">
                 <button type="submit" class="btn small">Přijmout</button>
               </form>
 
-              <form action="/friends/decline/<%= gameReq.username %>" method="post" style="display:inline">
+              <form action="/acceptGameRequest/<%= sender.id %>" method="post" style="display:inline">
                 <button type="submit" class="btn small danger">Odmítnout</button>
               </form>
             </li>

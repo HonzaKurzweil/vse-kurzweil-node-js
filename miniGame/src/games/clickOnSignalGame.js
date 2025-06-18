@@ -17,8 +17,8 @@ class GameInstancec {
     this.startTime = null;
   }
 
-  addPlayer(ws) {
-    this.players.push(ws);
+  addPlayer(playerId) {
+    this.players.push(playerId);
   }
 
   broadcast(msg) {
@@ -42,6 +42,7 @@ export const currentGames = new Set();
 
 const gameRequests = [];
 
+//TODO: do when request is declined or any user quits game
 function removeGameRequest(player1, player2) {
   const idx = gameRequests.findIndex(
     (pair) => pair[0] === player1 && pair[1] === player2
@@ -58,11 +59,6 @@ function addUniqueGameRequest(player1, player2) {
   }
 }
 
-export const sendGameRequest = async () => {
-  for (const [ws, userId] of connections.entries()) {
-  }
-};
-
 const createNewClickOnSignalGame = (playerId) => {
   const game = new GameInstancec();
   game.addPlayer(playerId);
@@ -70,6 +66,7 @@ const createNewClickOnSignalGame = (playerId) => {
   return game;
 };
 
+// returns users that send a request
 export const getGameRequests = async (receiverId) => {
   const relevantPairs = gameRequests.filter((pair) => pair[1] == receiverId);
   const users = await Promise.all(
@@ -138,13 +135,15 @@ clickOnSignalGame.post("/sendGameRequest", async (c) => {
   return c.html(rendered, 200);
 });
 
-clickOnSignalGame.post("acceptGameRequest/:gameId", async (c) => {
-  const gameId = c.req.param("gameId");
-  if (!gameId) {
+clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
+  const sender = findUserById(c.req.param("senderId"));
+
+  if (!sender) {
     return c.text("invalid game id", 400);
   }
 
-  const game = currentGames.find((g) => g.id === gameId);
+  const game = await findGameBySenderId(sender.id);
+
   if (!game) {
     return c.text("game not found", 404);
   }
@@ -153,13 +152,10 @@ clickOnSignalGame.post("acceptGameRequest/:gameId", async (c) => {
     return c.text("game already started or finished", 400);
   }
 
-  if (game.players.length >= 2) {
-    return c.text("game is full", 400);
-  }
   game.addPlayer(c.get("user").id);
 
   connections.forEach((ws, userId) => {
-    if (userId === player.id) {
+    if (userId === sender.id) {
       ws.send(
         JSON.stringify({
           type: "gameAccepted",
@@ -172,3 +168,13 @@ clickOnSignalGame.post("acceptGameRequest/:gameId", async (c) => {
   const rendered = await renderFile("views/clickOnSignalGame.html");
   return c.html(rendered, 200);
 });
+
+function findGameBySenderId(senderId) {
+  console.log(currentGames);
+  for (const game of currentGames) {
+    if (game.players.length === 1 && game.players[0].id === senderId) {
+      return game;
+    }
+  }
+  return null;
+}
