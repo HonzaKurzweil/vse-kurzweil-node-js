@@ -46,8 +46,8 @@ const createNewClickOnSignalGame = (playerId) => {
   return game;
 };
 
-clickOnSignalGame.get("/sendGameRequest", async (c) => {
-  const id = c.req.query("receiverId");
+clickOnSignalGame.post("/sendGameRequest", async (c) => {
+  const id = (await c.req.formData()).get("receiverId");
   console.log("sendGameRequest called: ", id);
   if (!id) {
     console.log("Invalid receiver id");
@@ -99,7 +99,7 @@ clickOnSignalGame.get("/sendGameRequest", async (c) => {
   return c.html(rendered, 200);
 });
 
-clickOnSignalGame.get("acceptGameRequest/:gameId", async (c) => {
+clickOnSignalGame.post("acceptGameRequest/:gameId", async (c) => {
   const gameId = c.req.param("gameId");
   if (!gameId) {
     return c.text("invalid game id", 400);

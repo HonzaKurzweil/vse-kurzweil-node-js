@@ -82,7 +82,7 @@ usersRouter.post("/register", async (c) => {
 usersRouter.get("/login", async (c) => {
   const error = c.req.query("error");
   const rendered = await renderFile("views/login.html", { error });
-  return c.html(rendered);
+  return c.html(rendered, 200);
 });
 
 usersRouter.post("/login", async (c) => {
