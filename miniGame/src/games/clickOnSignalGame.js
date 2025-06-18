@@ -176,6 +176,8 @@ clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
     }
   });
 
+  await updateGameParticipants(game);
+
   const players = await getAllPlayersInGame(game);
 
   const rendered = await renderFile("views/clickOnSignalGame.html", {
@@ -233,6 +235,15 @@ async function exitGame(game, exitingPlayerId) {
     }
   });
 
+  await updateGameParticipants(game);
+  currentGames.forEach((game) => {
+    if (game.players.length === 0) {
+      currentGames.delete(game);
+    }
+  });
+}
+
+async function updateGameParticipants(game) {
   const players = await getAllPlayersInGame(game);
 
   const rendered = await renderFile("views/_activePlayers.html", {
@@ -240,24 +251,17 @@ async function exitGame(game, exitingPlayerId) {
   });
 
   for (const playerId of game.players) {
-    if (playerId !== exitingPlayerId) {
-      for (const [ws, userId] of connections.entries()) {
-        if (userId === playerId) {
-          ws.send(
-            JSON.stringify({
-              type: "gameParticipantsChange",
-              html: rendered,
-            })
-          );
-        }
+    for (const [ws, userId] of connections.entries()) {
+      if (userId === playerId) {
+        ws.send(
+          JSON.stringify({
+            type: "gameParticipantsChange",
+            html: rendered,
+          })
+        );
       }
     }
   }
-  currentGames.forEach((game) => {
-    if (game.players.length === 0) {
-      currentGames.delete(game);
-    }
-  });
 }
 
 function findGameBySenderId(senderId) {
