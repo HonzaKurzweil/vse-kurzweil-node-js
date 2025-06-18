@@ -221,12 +221,17 @@ clickOnSignalGame.post("/declineGameRequest/:senderId", async (c) => {
 clickOnSignalGame.get("/exitGame", async (c) => {
   const game = findGameByParticipantId(c.get("user").id);
   exitGame(game, c.get("user").id);
-
-  return await redirectToMainPage(c);
+  return c.redirect("/mainPage");
 });
 
 async function exitGame(game, exitingPlayerId) {
   game.removePlayer(exitingPlayerId);
+
+  gameRequests.forEach((pair) => {
+    if (pair[0] === exitingPlayerId || pair[1] === exitingPlayerId) {
+      removeGameRequest(pair[0], pair[1]);
+    }
+  });
 
   const players = await getAllPlayersInGame(game);
 
@@ -248,6 +253,11 @@ async function exitGame(game, exitingPlayerId) {
       }
     }
   }
+  currentGames.forEach((game) => {
+    if (game.players.length === 0) {
+      currentGames.delete(game);
+    }
+  });
 }
 
 function findGameBySenderId(senderId) {
