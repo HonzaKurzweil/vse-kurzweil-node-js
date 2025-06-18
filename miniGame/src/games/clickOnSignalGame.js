@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { connections } from "../app.js";
 import { getActiveFriends } from "../users.js";
 import { renderFile } from "ejs";
+import { findUserById } from "../db.js";
 
 export const clickOnSignalGame = new Hono();
 
@@ -39,11 +40,42 @@ class GameInstancec {
 
 export const currentGames = new Set();
 
+const gameRequests = [];
+
+function removeGameRequest(player1, player2) {
+  const idx = gameRequests.findIndex(
+    (pair) => pair[0] === player1 && pair[1] === player2
+  );
+  if (idx !== -1) gameRequests.splice(idx, 1);
+}
+
+function addUniqueGameRequest(player1, player2) {
+  const exists = gameRequests.some(
+    (pair) => pair[0] === player1 && pair[1] === player2
+  );
+  if (!exists) {
+    gameRequests.push([player1, player2]);
+  }
+}
+
+export const sendGameRequest = async () => {
+  for (const [ws, userId] of connections.entries()) {
+  }
+};
+
 const createNewClickOnSignalGame = (playerId) => {
   const game = new GameInstancec();
   game.addPlayer(playerId);
   currentGames.add(game);
   return game;
+};
+
+export const getGameRequests = async (receiverId) => {
+  const relevantPairs = gameRequests.filter((pair) => pair[1] == receiverId);
+  const users = await Promise.all(
+    relevantPairs.map((pair) => findUserById(pair[0]))
+  );
+  return users.filter(Boolean);
 };
 
 clickOnSignalGame.post("/sendGameRequest", async (c) => {
@@ -74,6 +106,16 @@ clickOnSignalGame.post("/sendGameRequest", async (c) => {
   const game = createNewClickOnSignalGame(sender.id);
   console.log("Created new game:", game);
 
+  addUniqueGameRequest(sender.id, receiver.id);
+
+  const requestSenders = await getGameRequests(receiver.id);
+
+  const receivedGameRequests = await renderFile(
+    "views/_receiveGameRequest.html",
+    {
+      gameRequests: requestSenders,
+    }
+  );
   let sent = false;
   connections.forEach((userId, ws) => {
     console.log("Checking connection for userId:", userId);
@@ -82,9 +124,7 @@ clickOnSignalGame.post("/sendGameRequest", async (c) => {
       ws.send(
         JSON.stringify({
           type: "newGameRequest",
-          sender,
-          gameType: game.gameType,
-          gameId: game.id,
+          html: receivedGameRequests,
         })
       );
       sent = true;
@@ -94,7 +134,6 @@ clickOnSignalGame.post("/sendGameRequest", async (c) => {
     console.log("No WebSocket found for receiver:", receiver.id);
   }
 
-  c.set("game", game.id);
   const rendered = await renderFile("views/clickOnSignalGame.html");
   return c.html(rendered, 200);
 });
@@ -117,7 +156,6 @@ clickOnSignalGame.post("acceptGameRequest/:gameId", async (c) => {
   if (game.players.length >= 2) {
     return c.text("game is full", 400);
   }
-  c.set("game", gameId);
   game.addPlayer(c.get("user").id);
 
   connections.forEach((ws, userId) => {

@@ -1,86 +1,26 @@
-<section id="gameRequestsSection">
-  <h2>Žádosti o hru</h2>
-  <p id="noGameRequests">Žádné nové žádosti.</p>
-  <ul id="gameRequestList" class="request-list" style="display: none;"></ul>
-</section>
 
-<script>
-  // 1️⃣ Grab the DOM nodes
-  const gameRequests = [];
-  window.gameRequests = gameRequests;
-  const ul = document.getElementById('gameRequestList');
-  const emptyMsg = document.getElementById('noGameRequests');
+<div id="gameRequestsSection">
+   <section>
+      <h2>Žádosti o přátelství</h2>
+      <% if (gameRequests.length === 0) { %>
+        <p>Žádné nové žádosti.</p>
+      <% } else { %>
+        <ul class="request-list">
+          <% gameRequests.forEach(gameReq => { %>
+            <li>
+              <img src="/profile_pics/<%= gameReq.profilePicture %>" alt="avatar" class="avatar" width="32" height="32" style="vertical-align:middle; margin-right:8px;">
+              <span><%= gameReq.username %></span>
 
-  // 2️⃣ Render helper
-  function renderGameRequests() {
-    // show/hide empty message
-    if (gameRequests.length === 0) {
-      emptyMsg.style.display = '';
-      ul.style.display = 'none';
-      ul.innerHTML = '';
-      return;
-    }
-    emptyMsg.style.display = 'none';
-    ul.style.display = '';
-    ul.innerHTML = '';
+              <form action="/friends/accept/<%= gameReq.username %>" method="post" style="display:inline">
+                <button type="submit" class="btn small">Přijmout</button>
+              </form>
 
-    gameRequests.forEach((req, idx) => {
-      const li = document.createElement('li');
-
-      // avatar
-      const img = document.createElement('img');
-      img.src = `/profile_pics/${req.sender.profilePicture || 'dog.png'}`;
-      img.alt = req.sender.username;
-      img.className = 'avatar';
-      img.width = 32;
-      img.height = 32;
-      img.style = 'vertical-align:middle; margin-right:8px;';
-      li.appendChild(img);
-
-      // text
-      const text = document.createElement('span');
-      text.textContent = `${req.sender.username} – ${req.gameType}`;
-      li.appendChild(text);
-
-      // accept button
-      const accept = document.createElement('button');
-      accept.textContent = 'Přijmout';
-      accept.className = 'btn small';
-      accept.style.marginLeft = '8px';
-      accept.addEventListener('click', () => handleResponse(idx, true));
-      li.appendChild(accept);
-
-      // decline button
-      const decline = document.createElement('button');
-      decline.textContent = 'Odmítnout';
-      decline.className = 'btn small danger';
-      decline.style.marginLeft = '4px';
-      decline.addEventListener('click', () => handleResponse(idx, false));
-      li.appendChild(decline);
-
-      ul.appendChild(li);
-    });
-  }
-  window.renderGameRequests = renderGameRequests;
-
-  // 3️⃣ Handle accept/decline
-  async function handleResponse(index, isAccept) {
-    const { sender, game } = gameRequests[index];
-    try {
-      const url = isAccept
-        ? `/gameRequests/accept/${game.id}?senderId=${sender.id}`
-        : `/gameRequests/decline/${game.id}?senderId=${sender.id}`;
-
-      const res = await fetch(url, { method: 'POST' });
-      if (!res.ok) throw new Error(await res.text());
-      // remove from array + re-render
-      gameRequests.splice(index, 1);
-      renderGameRequests();
-    } catch (err) {
-      console.error('Error handling game request:', err);
-      alert('Chyba při odesílání odpovědi.');
-    }
-  }
-  // initial render
-  renderGameRequests();
-</script>
+              <form action="/friends/decline/<%= gameReq.username %>" method="post" style="display:inline">
+                <button type="submit" class="btn small danger">Odmítnout</button>
+              </form>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </section>
+</div>

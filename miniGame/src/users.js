@@ -61,6 +61,8 @@ usersRouter.get("/logout", async (c) => {
   }
   setCookie(c, "token", "");
   await sendActivePlayers();
+  //TODO send remove from friends requests
+
   return c.redirect("/");
 });
 

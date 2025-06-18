@@ -17,7 +17,10 @@ import {
   getUserByToken,
 } from "./db.js";
 import { getCookie } from "hono/cookie";
-import { clickOnSignalGame } from "./games/clickOnSignalGame.js";
+import {
+  clickOnSignalGame,
+  getGameRequests,
+} from "./games/clickOnSignalGame.js";
 
 export const connections = new Map();
 
@@ -69,10 +72,13 @@ app.get("/", async (c) => {
 });
 
 app.get("/mainPage", onlyForUsers, async (c) => {
-  const players = await getActiveFriends(c.get("user").id);
-  console.log("active players:", players);
+  const user = c.get("user");
+  const players = await getActiveFriends(user.id);
+  const gameRequests = await getGameRequests(user.id);
+
   const rendered = await renderFile("views/mainPage.html", {
     players,
+    gameRequests,
   });
   return c.html(rendered);
 });
@@ -120,3 +126,4 @@ app.get(
   })
 );
 //TODO: add image/name/password change to profile page
+//TODO: after page refresh, game request dissapear

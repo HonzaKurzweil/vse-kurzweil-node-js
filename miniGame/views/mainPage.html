@@ -47,17 +47,8 @@
     }
     if (data.type === 'newGameRequest') {
       console.log('Handling newGameRequest:', data);
-      if (window.gameRequests && window.renderGameRequests) {
-        window.gameRequests.push({
-  sender: data.sender,
-  gameId: data.gameId,
-  gameType: data.gameType
-});
-        window.renderGameRequests();
-        console.log('Added new game request and re-rendered.');
-      } else {
-        console.log('gameRequests or renderGameRequests not found on window.');
-      }
+      const el = document.getElementById("receiveGameRequest")
+      el.innerHTML = html
     }
    })
 </script>
