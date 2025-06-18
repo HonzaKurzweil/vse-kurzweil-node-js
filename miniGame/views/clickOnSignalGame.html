@@ -22,17 +22,62 @@
     .hidden { display: none; }
     button { font-size: 1.2rem; margin: 10px; }
   </style>
+    <link rel="stylesheet" href="/styles.css" />
+
 </head>
 <body>
   <div class="centered">
+    <h3>
+     <div id="gameParticipants"><%- include('_activePlayers.html') %></div>
+
+    </h3>
     <h2>Click On Signal</h2>
     <div id="colorField" class="color-field">Wait...</div>
+              <a href="/exitGame" class="btn link">exit game</a>
+
     <button id="clickBtn" class="hidden">Click!</button>
     <div id="resultMsg" class="hidden"></div>
     <div id="afterGameBtns" class="hidden">
       <button id="playAgainBtn">Play Again</button>
-      <button id="quitBtn">Quit</button>
     </div>
   </div>
+
+
+    <script>
+   const ws = new WebSocket("ws://localhost:3000/ws")
+ 
+   ws.addEventListener("message", (event) => {
+    console.log('received in game event', event.data)
+    let data;
+    try {
+      data = JSON.parse(event.data)
+    } catch (e) {
+      console.log('Failed to parse ws message:', event.data, e);
+      return;
+    }
+    console.log('Parsed ws message:', data);
+    const {type, html} = data;
+    if (type === "gameParticipantsChange") {
+      const el = document.getElementById("gameParticipants")
+      el.innerHTML = html
+    }
+          const colorField = document.getElementById("colorField");
+
+    if (type === "gameStart") {
+    if (colorField) {
+      colorField.style.backgroundColor = "yellow";
+
+    }
+     const clickButton = document.getElementById("clickButton");
+    if (clickButton) {
+      clickButton.style.display = "block"; // or clickButton.hidden = false;
+    }
+    }
+    if (data.type === 'clickEvent') {
+      colorField.style.backgroundColor = "green";
+
+    }
+   })
+</script>
 </body>
 </html>

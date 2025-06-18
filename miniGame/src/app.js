@@ -72,15 +72,7 @@ app.get("/", async (c) => {
 });
 
 app.get("/mainPage", onlyForUsers, async (c) => {
-  const user = c.get("user");
-  const players = await getActiveFriends(user.id);
-  const gameRequests = await getGameRequests(user.id);
-
-  const rendered = await renderFile("views/mainPage.html", {
-    players,
-    gameRequests,
-  });
-  return c.html(rendered);
+  return await redirectToMainPage(c);
 });
 
 app.get("/friendsPage", async (c) => {
@@ -125,5 +117,18 @@ app.get(
     };
   })
 );
+
+export async function redirectToMainPage(c) {
+  const user = c.get("user");
+  const players = await getActiveFriends(user.id);
+  const gameRequests = await getGameRequests(user.id);
+
+  const rendered = await renderFile("views/mainPage.html", {
+    players,
+    gameRequests,
+  });
+  return c.html(rendered);
+}
+
 //TODO: add image/name/password change to profile page
 //TODO: after page refresh, game request dissapear

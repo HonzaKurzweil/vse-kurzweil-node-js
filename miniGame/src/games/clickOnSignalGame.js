@@ -1,12 +1,12 @@
 import { Hono } from "hono";
-import { connections } from "../app.js";
+import { connections, redirectToMainPage } from "../app.js";
 import { getActiveFriends } from "../users.js";
 import { renderFile } from "ejs";
 import { findUserById } from "../db.js";
 
 export const clickOnSignalGame = new Hono();
 
-class GameInstancec {
+class GameInstance {
   constructor() {
     this.id = crypto.randomUUID();
     this.gameType = "clickOnSignal";
@@ -19,6 +19,13 @@ class GameInstancec {
 
   addPlayer(playerId) {
     this.players.push(playerId);
+  }
+
+  removePlayer(playerId) {
+    const idx = this.players.indexOf(playerId);
+    if (idx !== -1) {
+      this.players.splice(idx, 1);
+    }
   }
 
   broadcast(msg) {
@@ -60,7 +67,7 @@ function addUniqueGameRequest(player1, player2) {
 }
 
 const createNewClickOnSignalGame = (playerId) => {
-  const game = new GameInstancec();
+  const game = new GameInstance();
   game.addPlayer(playerId);
   currentGames.add(game);
   return game;
@@ -131,7 +138,11 @@ clickOnSignalGame.post("/sendGameRequest", async (c) => {
     console.log("No WebSocket found for receiver:", receiver.id);
   }
 
-  const rendered = await renderFile("views/clickOnSignalGame.html");
+  const players = await getAllPlayersInGame(game);
+
+  const rendered = await renderFile("views/clickOnSignalGame.html", {
+    players,
+  });
   return c.html(rendered, 200);
 });
 
@@ -165,7 +176,11 @@ clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
     }
   });
 
-  const rendered = await renderFile("views/clickOnSignalGame.html");
+  const players = await getAllPlayersInGame(game);
+
+  const rendered = await renderFile("views/clickOnSignalGame.html", {
+    players,
+  });
   return c.html(rendered, 200);
 });
 
@@ -203,6 +218,38 @@ clickOnSignalGame.post("/declineGameRequest/:senderId", async (c) => {
   return c.text("game request declined", 200);
 });
 
+clickOnSignalGame.get("/exitGame", async (c) => {
+  const game = findGameByParticipantId(c.get("user").id);
+  exitGame(game, c.get("user").id);
+
+  return await redirectToMainPage(c);
+});
+
+async function exitGame(game, exitingPlayerId) {
+  game.removePlayer(exitingPlayerId);
+
+  const players = await getAllPlayersInGame(game);
+
+  const rendered = await renderFile("views/_activePlayers.html", {
+    players,
+  });
+
+  for (const playerId of game.players) {
+    if (playerId !== exitingPlayerId) {
+      for (const [ws, userId] of connections.entries()) {
+        if (userId === playerId) {
+          ws.send(
+            JSON.stringify({
+              type: "gameParticipantsChange",
+              html: rendered,
+            })
+          );
+        }
+      }
+    }
+  }
+}
+
 function findGameBySenderId(senderId) {
   console.log(currentGames);
   for (const game of currentGames) {
@@ -211,4 +258,20 @@ function findGameBySenderId(senderId) {
     }
   }
   return null;
+}
+
+function findGameByParticipantId(participantId) {
+  for (const game of currentGames) {
+    if (game.players.some((playerId) => playerId === participantId)) {
+      return game;
+    }
+  }
+  return null;
+}
+
+async function getAllPlayersInGame(game) {
+  const users = await Promise.all(
+    game.players.map((playerId) => findUserById(playerId))
+  );
+  return users.filter(Boolean);
 }
