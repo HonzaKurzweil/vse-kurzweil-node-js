@@ -169,6 +169,40 @@ clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
   return c.html(rendered, 200);
 });
 
+clickOnSignalGame.post("/declineGameRequest/:senderId", async (c) => {
+  const sender = findUserById(c.req.param("senderId"));
+
+  if (!sender) {
+    return c.text("invalid game id", 400);
+  }
+
+  const game = await findGameBySenderId(sender.id);
+
+  if (!game) {
+    return c.text("game not found", 404);
+  }
+
+  if (game.state !== "waiting") {
+    return c.text("game already started or finished", 400);
+  }
+
+  removeGameRequest(sender.id, c.get("user").id);
+
+  game.state = "finished";
+
+  connections.forEach((ws, userId) => {
+    if (userId === sender.id) {
+      ws.send(
+        JSON.stringify({
+          type: "gameDeclined",
+          gameId: gameId,
+        })
+      );
+    }
+  });
+  return c.text("game request declined", 200);
+});
+
 function findGameBySenderId(senderId) {
   console.log(currentGames);
   for (const game of currentGames) {
