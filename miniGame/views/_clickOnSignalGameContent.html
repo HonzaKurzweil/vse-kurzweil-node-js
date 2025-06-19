@@ -24,3 +24,16 @@ if (game && (game.state === 'waiting' || game.state === 'orange')) {
 <div id="colorField" class="color-field" style="background-color:<%= color %>;">
   <%= text %>
 </div>
+<% if (game && game.state === 'finished') { %>
+<div id="afterGameBtn">
+  <a href="/restartGame" class="btn link">Play again!</a>
+       <a href="/exitGame" class="btn link">exit game</a>
+
+</div>
+<% } %>
+
+<% if (game && (game.state === 'ready'|| game.state === 'go') ) { %>
+  <div id="clickBtnContainer">
+    <a href="/clickGameBtn" class="btn link">Click!</a>
+  </div>
+<% } %>

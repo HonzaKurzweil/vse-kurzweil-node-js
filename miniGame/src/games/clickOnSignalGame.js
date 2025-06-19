@@ -13,8 +13,6 @@ class GameInstance {
     this.players = [];
     this.state = "waiting"; // waiting, ready, go, finished
     this.winner = null;
-    this.clicked = false;
-    this.startTime = null;
   }
 
   addPlayer(playerId) {
@@ -180,7 +178,7 @@ clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
 
   game.state = "ready";
   await updateGameState(game);
-
+  startGame(game);
   return c.redirect(`/game/${game.id}`);
 });
 
@@ -232,12 +230,20 @@ clickOnSignalGame.get("/exitGame", async (c) => {
   return c.redirect("/mainPage");
 });
 
+clickOnSignalGame.get("/restartGame", async (c) => {
+  const game = findGameByParticipantId(c.get("user").id);
+  game.state = "ready";
+  game.winner = null;
+  updateGameState(game);
+  return c.redirect(`/game/${game.id}`);
+});
+
 clickOnSignalGame.get("/clickGameBtn", async (c) => {
   const game = findGameByParticipantId(c.get("user").id);
   game.winner = c.get("user").id;
   game.state = "finished";
   await updateGameState(game);
-  return c.text("ok"); // Always return a response, even if just a simple text
+  return c.redirect(`/game/${game.id}`);
 });
 
 async function exitGame(game, exitingPlayerId) {
