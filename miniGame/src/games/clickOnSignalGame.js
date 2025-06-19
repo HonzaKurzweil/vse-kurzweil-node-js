@@ -178,6 +178,9 @@ clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
 
   game.state = "ready";
   await updateGameState(game);
+  setTimeout(() => {
+    startGame(game);
+  }, Math.floor(Math.random() * 4000) + 4000); // random 4-8s
   return c.redirect(`/game/${game.id}`);
 });
 
@@ -185,6 +188,10 @@ const startGame = async (game) => {
   setTimeout(() => {
     console.log("Waited a random time between 4 and 8 seconds!");
   }, (Math.random() * (8 - 4) + 4) * 1000);
+  if (game.state !== "ready") {
+    console.log("Game is not ready, cannot start");
+    return;
+  }
   game.state = "go";
   await updateGameState(game);
 };
@@ -234,6 +241,9 @@ clickOnSignalGame.get("/restartGame", async (c) => {
   game.state = "ready";
   game.winner = null;
   updateGameState(game);
+  setTimeout(() => {
+    startGame(game);
+  }, Math.floor(Math.random() * 4000) + 4000); // random 4-8s
   return c.redirect(`/game/${game.id}`);
 });
 

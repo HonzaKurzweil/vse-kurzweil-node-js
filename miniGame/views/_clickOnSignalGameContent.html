@@ -6,7 +6,7 @@ if (game && (game.state === 'waiting' || game.state === 'orange')) {
   color = 'blue';
   text = 'Go!!';
 } else if (game && game.state === 'ready') {
-  color = 'yellow';
+  color = 'orange';
   text = 'Ready!';
 } else if (game && game.state === 'finished') {
   if (playerId && game.winner && playerId == game.winner) {
@@ -25,15 +25,17 @@ if (game && (game.state === 'waiting' || game.state === 'orange')) {
   <%= text %>
 </div>
 <% if (game && game.state === 'finished') { %>
-<div id="afterGameBtn">
+<div id="afterGameBtn" style="margin-bottom: 24px;">
   <a href="/restartGame" class="btn link">Play again!</a>
-       <a href="/exitGame" class="btn link">exit game</a>
-
 </div>
 <% } %>
 
 <% if (game && (game.state === 'ready'|| game.state === 'go') ) { %>
-  <div id="clickBtnContainer">
+  <div id="clickBtnContainer" style="margin-bottom: 24px;">
     <a href="/clickGameBtn" class="btn link">Click!</a>
   </div>
 <% } %>
+<div>
+           <a href="/exitGame" class="btn link">exit game</a>
+
+</div>
