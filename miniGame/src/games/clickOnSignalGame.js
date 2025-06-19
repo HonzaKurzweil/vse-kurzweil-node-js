@@ -123,14 +123,27 @@ clickOnSignalGame.post("/sendGameRequest", async (c) => {
     console.log("No WebSocket found for receiver:", receiver.id);
   }
 
-  const players = await getAllPlayersInGame(game);
+  return c.redirect(`/game/${game.id}`);
+});
 
-  const rendered = await renderFile("views/clickOnSignalGame.html", {
-    players,
-    game,
-    playerId: sender.id,
-  });
-  return c.html(rendered, 200);
+clickOnSignalGame.get("/game/:gameId", async (c) => {
+  const user = c.get("user");
+  const gameId = c.req.param("gameId");
+  const game = Array.from(currentGames).find((g) => g.id === gameId);
+  if (!game) {
+    return c.text("Game not found", 404);
+  }
+  if (!game.players.includes(user.id)) {
+    return c.text("You are not a participant in this game", 403);
+  }
+  const players = await getAllPlayersInGame(game);
+  return c.html(
+    await renderFile("views/clickOnSignalGame.html", {
+      players,
+      game,
+      playerId: user.id,
+    })
+  );
 });
 
 clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
@@ -165,18 +178,10 @@ clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
 
   await updateGameParticipants(game);
 
-  const players = await getAllPlayersInGame(game);
   game.state = "ready";
   await updateGameState(game);
 
-  const rendered = await renderFile("views/clickOnSignalGame.html", {
-    players,
-    game,
-    playerId: c.get("user").id,
-  });
-  await startGame(game);
-
-  return c.html(rendered, 200);
+  return c.redirect(`/game/${game.id}`);
 });
 
 const startGame = async (game) => {
