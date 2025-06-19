@@ -11,7 +11,7 @@ class GameInstance {
     this.id = crypto.randomUUID();
     this.gameType = "clickOnSignal";
     this.players = [];
-    this.state = "waiting"; // waiting, ready, finished
+    this.state = "waiting"; // waiting, ready, go, finished
     this.winner = null;
     this.clicked = false;
     this.startTime = null;
@@ -26,22 +26,6 @@ class GameInstance {
     if (idx !== -1) {
       this.players.splice(idx, 1);
     }
-  }
-
-  broadcast(msg) {
-    for (const ws of this.players) {
-      if (ws.readyState === 1) ws.send(JSON.stringify(msg));
-    }
-  }
-
-  start() {
-    this.broadcast({ type: "wait" });
-    setTimeout(() => {
-      if (this.state !== "waiting") return;
-      this.state = "ready";
-      this.clicked = false;
-      this.broadcast({ type: "ready" });
-    }, randomDelay());
   }
 }
 
@@ -129,6 +113,7 @@ clickOnSignalGame.post("/sendGameRequest", async (c) => {
         JSON.stringify({
           type: "newGameRequest",
           html: receivedGameRequests,
+          playerId: userId,
         })
       );
       sent = true;
@@ -142,6 +127,8 @@ clickOnSignalGame.post("/sendGameRequest", async (c) => {
 
   const rendered = await renderFile("views/clickOnSignalGame.html", {
     players,
+    game,
+    playerId: sender.id,
   });
   return c.html(rendered, 200);
 });
@@ -179,12 +166,26 @@ clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
   await updateGameParticipants(game);
 
   const players = await getAllPlayersInGame(game);
+  game.state = "ready";
+  await updateGameState(game);
 
   const rendered = await renderFile("views/clickOnSignalGame.html", {
     players,
+    game,
+    playerId: c.get("user").id,
   });
+  await startGame(game);
+
   return c.html(rendered, 200);
 });
+
+const startGame = async (game) => {
+  setTimeout(() => {
+    console.log("Waited a random time between 4 and 8 seconds!");
+  }, (Math.random() * (8 - 4) + 4) * 1000);
+  game.state = "go";
+  await updateGameState(game);
+};
 
 clickOnSignalGame.post("/declineGameRequest/:senderId", async (c) => {
   const sender = findUserById(c.req.param("senderId"));
@@ -226,6 +227,14 @@ clickOnSignalGame.get("/exitGame", async (c) => {
   return c.redirect("/mainPage");
 });
 
+clickOnSignalGame.get("/clickGameBtn", async (c) => {
+  const game = findGameByParticipantId(c.get("user").id);
+  game.winner = c.get("user").id;
+  game.state = "finished";
+  await updateGameState(game);
+  return c.text("ok"); // Always return a response, even if just a simple text
+});
+
 async function exitGame(game, exitingPlayerId) {
   game.removePlayer(exitingPlayerId);
 
@@ -241,6 +250,29 @@ async function exitGame(game, exitingPlayerId) {
       currentGames.delete(game);
     }
   });
+}
+
+async function updateGameState(game) {
+  for (const playerId of game.players) {
+    for (const [ws, userId] of connections.entries()) {
+      if (userId === playerId) {
+        console.log("SENDING GAME UPDATE TO PLAYER:", userId);
+        const rendered = await renderFile(
+          "views/_clickOnSignalGameContent.html",
+          {
+            game,
+            playerId,
+          }
+        );
+
+        ws.send(
+          JSON.stringify({
+            html: rendered,
+          })
+        );
+      }
+    }
+  }
 }
 
 async function updateGameParticipants(game) {

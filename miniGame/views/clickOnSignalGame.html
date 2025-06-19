@@ -16,7 +16,7 @@
       justify-content: center;
       font-size: 2rem;
       color: white;
-      transition: background 0.3s;
+      transition: background 0.1s;
     }
     .centered { text-align: center; }
     .hidden { display: none; }
@@ -29,14 +29,18 @@
   <div class="centered">
     <h3>
      <div id="gameParticipants"><%- include('_activePlayers.html') %></div>
-
     </h3>
     <h2>Click On Signal</h2>
-    <div id="colorField" class="color-field">Wait...</div>
+    
+         <div id="gameState"><%- include('_clickOnSignalGameContent.html') %></div>
+
               <a href="/exitGame" class="btn link">exit game</a>
 
-    <button id="clickBtn" class="hidden">Click!</button>
     <div id="resultMsg" class="hidden"></div>
+      
+       <a href="/clickGameBtn" class="btn link">Click!</a>
+
+
     <div id="afterGameBtns" class="hidden">
       <button id="playAgainBtn">Play Again</button>
     </div>
@@ -63,21 +67,14 @@
     }
           const colorField = document.getElementById("colorField");
 
-    if (type === "gameStart") {
+    if (type === "gameStateChange") {
     if (colorField) {
-      colorField.style.backgroundColor = "yellow";
+      const el1 = document.getElementById("gameState")
+      el1.innerHTML = html
+    }
+  }
+});
 
-    }
-     const clickButton = document.getElementById("clickButton");
-    if (clickButton) {
-      clickButton.style.display = "block"; // or clickButton.hidden = false;
-    }
-    }
-    if (data.type === 'clickEvent') {
-      colorField.style.backgroundColor = "green";
-
-    }
-   })
 </script>
 </body>
 </html>

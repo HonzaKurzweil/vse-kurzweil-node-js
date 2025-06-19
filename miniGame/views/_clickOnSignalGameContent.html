@@ -1,0 +1,26 @@
+<% let color, text;
+if (game && (game.state === 'waiting' || game.state === 'orange')) {
+  color = 'yellow';
+  text = 'Wait...';
+} else if (game && game.state === 'go') {
+  color = 'blue';
+  text = 'Go!!';
+} else if (game && game.state === 'ready') {
+  color = 'yellow';
+  text = 'Ready!';
+} else if (game && game.state === 'finished') {
+  if (playerId && game.winner && playerId == game.winner) {
+    color = 'green';
+    text = 'WIN';
+  } else {
+    color = 'red';
+    text = 'LOSE';
+  }
+} else {
+  color = 'red';
+  text = 'Wait...';
+}
+%>
+<div id="colorField" class="color-field" style="background-color:<%= color %>;">
+  <%= text %>
+</div>

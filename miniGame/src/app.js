@@ -132,3 +132,4 @@ export async function redirectToMainPage(c) {
 
 //TODO: add image/name/password change to profile page
 //TODO: after page refresh, game request dissapear
+//TODO: game decline event send to game initiator
