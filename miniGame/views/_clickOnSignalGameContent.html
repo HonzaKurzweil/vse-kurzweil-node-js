@@ -26,16 +26,15 @@ if (game && (game.state === 'waiting' || game.state === 'orange')) {
 </div>
 <% if (game && game.state === 'finished') { %>
 <div id="afterGameBtn" style="margin-bottom: 24px;">
-  <a href="/restartGame" class="btn link">Play again!</a>
+  <a href="/restartGame" class="btn dark">Play again!</a>
 </div>
 <% } %>
 
 <% if (game && (game.state === 'ready'|| game.state === 'go') ) { %>
   <div id="clickBtnContainer" style="margin-bottom: 24px;">
-    <a href="/clickGameBtn" class="btn link">Click!</a>
+    <a href="/clickGameBtn" class="btn dark">Click!</a>
   </div>
 <% } %>
 <div>
-           <a href="/exitGame" class="btn link">exit game</a>
-
+  <a href="/exitGame" class="btn dark">Exit game</a>
 </div>

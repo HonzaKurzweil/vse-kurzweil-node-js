@@ -6,7 +6,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Document</title>
+    <title>Přihlášení</title>
+    <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <% if (typeof error !== 'undefined' && error) { %>
@@ -18,22 +19,26 @@
         }, 3000);
       </script>
     <% } %>
-    <h1>Přihlášení</h1>
-    <form action="/login" method="post">
-      <input
-        type="text"
-        name="username"
-        placeholder="Jméno"
-      />
+    <div class="main-content">
+      <h1>Přihlášení</h1>
+      <form action="/login" method="post" class="login-form">
+        <input
+          type="text"
+          name="username"
+          placeholder="Jméno"
+          required
+        />
 
-      <input
-        type="password"
-        name="password"
-        placeholder="Heslo"
-      />
+        <input
+          type="password"
+          name="password"
+          placeholder="Heslo"
+          required
+        />
 
-      <button type="submit">Přihlásit se</button>
-    </form>
-    <a href="/" class="btn">Main page</a>
+        <button type="submit" class="btn dark">Přihlásit se</button>
+      </form>
+      <a href="/" class="btn dark">Hlavní stránka</a>
+    </div>
   </body>
 </html>

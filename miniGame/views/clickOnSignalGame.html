@@ -4,26 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Click On Signal Game</title>
-  <style>
-    .color-field {
-      width: 200px;
-      height: 200px;
-      margin: 30px auto;
-      border-radius: 20px;
-      background: red;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      color: white;
-      transition: background 0.1s;
-    }
-    .centered { text-align: center; }
-    .hidden { display: none; }
-    button { font-size: 1.2rem; margin: 10px; }
-  </style>
-    <link rel="stylesheet" href="/styles.css" />
-
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <div class="centered">
@@ -31,16 +12,10 @@
      <div id="gameParticipants"><%- include('_activePlayers.html') %></div>
     </h3>
     <h2>Click On Signal</h2>
-    
-         <div id="gameState"><%- include('_clickOnSignalGameContent.html') %></div>
-
-          
+    <div id="gameState"><%- include('_clickOnSignalGameContent.html') %></div>
   </div>
-
-
-    <script>
+  <script>
    const ws = new WebSocket("ws://localhost:3000/ws")
- 
    ws.addEventListener("message", (event) => {
     console.log('received in game event', event.data)
     let data;
@@ -56,16 +31,11 @@
       const el = document.getElementById("gameParticipants")
       el.innerHTML = html
     }
-          const colorField = document.getElementById("colorField");
-
     if (type === "gameStateChange") {
-    if (colorField) {
       const el1 = document.getElementById("gameState")
       el1.innerHTML = html
     }
-  }
-});
-
-</script>
+  });
+  </script>
 </body>
 </html>
