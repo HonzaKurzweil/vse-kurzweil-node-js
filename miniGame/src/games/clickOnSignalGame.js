@@ -178,7 +178,6 @@ clickOnSignalGame.post("/acceptGameRequest/:senderId", async (c) => {
 
   game.state = "ready";
   await updateGameState(game);
-  startGame(game);
   return c.redirect(`/game/${game.id}`);
 });
 
@@ -240,7 +239,12 @@ clickOnSignalGame.get("/restartGame", async (c) => {
 
 clickOnSignalGame.get("/clickGameBtn", async (c) => {
   const game = findGameByParticipantId(c.get("user").id);
-  game.winner = c.get("user").id;
+  if (game.state === "go") {
+    game.winner = c.get("user").id;
+  } else {
+    const players = await getAllPlayersInGame(game);
+    game.winner = players.find((p) => p.id !== c.get("user").id)?.id;
+  }
   game.state = "finished";
   await updateGameState(game);
   return c.redirect(`/game/${game.id}`);
@@ -278,6 +282,7 @@ async function updateGameState(game) {
 
         ws.send(
           JSON.stringify({
+            type: "gameStateChange",
             html: rendered,
           })
         );
