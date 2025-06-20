@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Přihlášení</title>
+    <title>Log in</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
@@ -20,25 +20,25 @@
       </script>
     <% } %>
     <div class="main-content">
-      <h1>Přihlášení</h1>
+      <h1>Log in</h1>
       <form action="/login" method="post" class="login-form">
         <input
           type="text"
           name="username"
-          placeholder="Jméno"
+          placeholder="name"
           required
         />
 
         <input
           type="password"
           name="password"
-          placeholder="Heslo"
+          placeholder="pasword"
           required
         />
 
-        <button type="submit" class="btn dark">Přihlásit se</button>
+        <button type="submit" class="btn dark">submit</button>
       </form>
-      <a href="/" class="btn dark">Hlavní stránka</a>
+      <a href="/" class="btn dark">welcome page</a>
     </div>
   </body>
 </html>

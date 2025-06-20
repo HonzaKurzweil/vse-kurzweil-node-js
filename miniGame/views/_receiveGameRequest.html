@@ -1,9 +1,9 @@
 
 <div id="gameRequestsSection">
    <section>
-      <h2>Žádosti o hru</h2>
+      <h2>Game requests</h2>
       <% if (gameRequests.length === 0) { %>
-        <p>Žádné nové žádosti.</p>
+        <p>There are no challenges for you</p>
       <% } else { %>
         <ul class="request-list">
           <% gameRequests.forEach(sender => { %>
@@ -12,11 +12,11 @@
               <span><%= sender.username %></span>
 
               <form action="/acceptGameRequest/<%= sender.id %>" method="post" style="display:inline">
-                <button type="submit" class="btn small">Přijmout</button>
+                <button type="submit" class="btn small">Accept</button>
               </form>
 
               <form action="/declineGameRequest/<%= sender.id %>" method="post" style="display:inline">
-                <button type="submit" class="btn small danger">Odmítnout</button>
+                <button type="submit" class="btn small danger">Decline</button>
               </form>
             </li>
           <% }) %>

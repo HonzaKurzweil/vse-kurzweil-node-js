@@ -1,10 +1,10 @@
 <form id="sendGameRequestForm" action="/sendGameRequest" method="POST">
-  <h3>Odeslat herní žádost</h3>
+  <h3>Challenge your friend</h3>
   <select id="receiverSelect" name="receiverId" required>
-    <option value="">-- Vyberte aktivního přítele --</option>
+    <option value="">-- Choose an active friend --</option>
     <% players.forEach(function(player) { %>
       <option value="<%= player.id %>"><%= player.username %></option>
     <% }); %>
   </select>
-  <button type="submit">Odeslat herní žádost!</button>
+  <button type="submit">Send game request!</button>
 </form>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Přátelé</title>
+  <title>Freinds page</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
@@ -17,23 +17,23 @@
     </script>
   <% } %>
   <header class="top-bar">
-    <div class="app-title">Přátelé</div>
-    <a href="/mainPage" class="btn link">Zpět</a>
+    <div class="app-title">Freinds page</div>
+    <a href="/mainPage" class="btn link">Back</a>
   </header>
 
   <main class="main-content">
     <section>
-      <h2>Přidat přítele</h2>
+      <h2>Add a friend!</h2>
       <form action="/friends/add" method="post">
   <input type="text" name="username" placeholder="Uživatelské jméno" required />
-  <button type="submit" class="btn">Přidat</button>
+  <button type="submit" class="btn">Add</button>
 </form>
     </section>
 
     <section>
-      <h2>Žádosti o přátelství</h2>
+      <h2>Friendship requests</h2>
       <% if (friendRequests.length === 0) { %>
-        <p>Žádné nové žádosti.</p>
+        <p>No new requests.</p>
       <% } else { %>
         <ul class="request-list">
           <% friendRequests.forEach(request => { %>
@@ -42,11 +42,11 @@
               <span><%= request.username %></span>
 
               <form action="/friends/accept/<%= request.username %>" method="post" style="display:inline">
-                <button type="submit" class="btn small">Přijmout</button>
+                <button type="submit" class="btn small">Accept</button>
               </form>
 
               <form action="/friends/decline/<%= request.username %>" method="post" style="display:inline">
-                <button type="submit" class="btn small danger">Odmítnout</button>
+                <button type="submit" class="btn small danger">Declime</button>
               </form>
             </li>
           <% }) %>
@@ -55,9 +55,9 @@
     </section>
 
     <section>
-      <h2>Seznam přátel</h2>
+      <h2>Friends list</h2>
       <% if (friends.length === 0) { %>
-        <p>Nemáte žádné přátele.</p>
+        <p>You have no friends :(</p>
       <% } else { %>
         <ul class="friend-list">
           <% friends.forEach(friend => { %>
@@ -66,7 +66,7 @@
               <span><%= friend.username %></span>
 
               <form action="/friends/delete/<%= friend.username %>" method="post" style="display:inline">
-                <button type="submit" class="btn small danger">Odebrat</button>
+                <button type="submit" class="btn small danger">Remove</button>
               </form>
 
               <form action="/scoreboard/mutual" method="get" style="display:inline">
